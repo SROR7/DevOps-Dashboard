@@ -84,6 +84,43 @@ app.get("/api/github/actions", async (req, res) => {
   }
 });
 
+// GitHub Pull Requests
+app.get("/api/github/pulls", async (req, res) => {
+    try {
+      const repo = req.query.repo;
+  
+      if (!repo) {
+        return res.status(400).json({
+          error: "Repository name is required",
+        });
+      }
+  
+      const response = await githubApi.get(
+        `/repos/${process.env.GITHUB_USERNAME}/${repo}/pulls`,
+        {
+          params: {
+            state: "all",
+            sort: "updated",
+            direction: "desc",
+            per_page: 20,
+          },
+        }
+      );
+  
+      res.json(response.data);
+    } catch (error) {
+      console.error(
+        "GitHub Pull Requests API Error:",
+        error.response?.data || error.message
+      );
+  
+      res.status(error.response?.status || 500).json({
+        error: "Failed to fetch GitHub Pull Requests",
+        message: error.response?.data?.message || error.message,
+      });
+    }
+  });
+  
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

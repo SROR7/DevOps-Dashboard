@@ -3,6 +3,7 @@ function Sidebar({ activeItem, onNavigate }) {
     "Dashboard",
     "Repositories",
     "Actions",
+    "Pull Requests",
     "Terraform",
     "Resources",
     "Clusters",
