@@ -415,7 +415,11 @@
   
     gap: 10px;
   }
-  
+
+  .actions-repository-selector {
+    margin-bottom: 32px;
+  }
+
   .header-button {
     width: 38px;
     height: 38px;
@@ -1373,3 +1377,5 @@
       height: 200px;
     }
   }
+
+  
