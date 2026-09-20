@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import Github from "./pages/Github";
 import Actions from "./pages/Actions";
 import PullRequests from "./pages/PullRequests";
+import Issues from "./pages/Issues";
 import "./index.css";
 
 function Dashboard() {
@@ -154,6 +155,9 @@ function App() {
         
       case "Pull Requests":
         return <PullRequests />;
+
+      case "Issues":
+        return <Issues />;
 
       case "Terraform":
         return (
