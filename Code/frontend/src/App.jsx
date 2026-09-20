@@ -4,6 +4,7 @@ import Github from "./pages/Github";
 import Actions from "./pages/Actions";
 import PullRequests from "./pages/PullRequests";
 import Issues from "./pages/Issues";
+import Aws from "./pages/Aws";
 import "./index.css";
 
 function Dashboard() {
@@ -158,6 +159,9 @@ function App() {
 
       case "Issues":
         return <Issues />;
+    
+      case "AWS":
+        return <Aws />;
 
       case "Terraform":
         return (

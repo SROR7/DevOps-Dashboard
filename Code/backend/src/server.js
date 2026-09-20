@@ -5,6 +5,12 @@ const cors = require("cors");
 
 const githubApi = require("./github");
 
+const {
+  getAwsOverview,
+  getEc2Instances,
+  getS3Buckets,
+} = require("./aws");
+
 const app = express();
 
 app.use(cors());
@@ -23,7 +29,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// GitHub Repositories
 app.get("/api/github/repos", async (req, res) => {
   try {
     const response = await githubApi.get(
@@ -45,12 +50,12 @@ app.get("/api/github/repos", async (req, res) => {
 
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch GitHub repositories",
-      message: error.response?.data?.message || error.message,
+      message:
+        error.response?.data?.message || error.message,
     });
   }
 });
 
-// GitHub Actions
 app.get("/api/github/actions", async (req, res) => {
   try {
     const repo = req.query.repo;
@@ -73,55 +78,55 @@ app.get("/api/github/actions", async (req, res) => {
     res.json(response.data.workflow_runs);
   } catch (error) {
     console.error(
-      "GitHub Actions API Error:",
+      "GitHub API Error:",
       error.response?.data || error.message
     );
 
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch GitHub Actions",
-      message: error.response?.data?.message || error.message,
+      message:
+        error.response?.data?.message || error.message,
     });
   }
 });
 
-// GitHub Pull Requests
 app.get("/api/github/pulls", async (req, res) => {
-    try {
-      const repo = req.query.repo;
-  
-      if (!repo) {
-        return res.status(400).json({
-          error: "Repository name is required",
-        });
-      }
-  
-      const response = await githubApi.get(
-        `/repos/${process.env.GITHUB_USERNAME}/${repo}/pulls`,
-        {
-          params: {
-            state: "all",
-            sort: "updated",
-            direction: "desc",
-            per_page: 20,
-          },
-        }
-      );
-  
-      res.json(response.data);
-    } catch (error) {
-      console.error(
-        "GitHub Pull Requests API Error:",
-        error.response?.data || error.message
-      );
-  
-      res.status(error.response?.status || 500).json({
-        error: "Failed to fetch GitHub Pull Requests",
-        message: error.response?.data?.message || error.message,
+  try {
+    const repo = req.query.repo;
+
+    if (!repo) {
+      return res.status(400).json({
+        error: "Repository name is required",
       });
     }
-  });
-  
-  // GitHub Issues
+
+    const response = await githubApi.get(
+      `/repos/${process.env.GITHUB_USERNAME}/${repo}/pulls`,
+      {
+        params: {
+          state: "all",
+          sort: "updated",
+          direction: "desc",
+          per_page: 20,
+        },
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(
+      "GitHub Pull Requests API Error:",
+      error.response?.data || error.message
+    );
+
+    res.status(error.response?.status || 500).json({
+      error: "Failed to fetch GitHub Pull Requests",
+      message:
+        error.response?.data?.message || error.message,
+    });
+  }
+});
+
 app.get("/api/github/issues", async (req, res) => {
   try {
     const repo = req.query.repo;
@@ -157,7 +162,62 @@ app.get("/api/github/issues", async (req, res) => {
 
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch GitHub Issues",
-      message: error.response?.data?.message || error.message,
+      message:
+        error.response?.data?.message || error.message,
+    });
+  }
+});
+
+app.get("/api/aws/overview", async (req, res) => {
+  try {
+    const data = await getAwsOverview();
+
+    res.json(data);
+  } catch (error) {
+    console.error(
+      "AWS API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: "Failed to fetch AWS data",
+      message: error.message,
+    });
+  }
+});
+
+app.get("/api/aws/ec2", async (req, res) => {
+  try {
+    const instances = await getEc2Instances();
+
+    res.json(instances);
+  } catch (error) {
+    console.error(
+      "AWS EC2 API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: "Failed to fetch EC2 instances",
+      message: error.message,
+    });
+  }
+});
+
+app.get("/api/aws/s3", async (req, res) => {
+  try {
+    const buckets = await getS3Buckets();
+
+    res.json(buckets);
+  } catch (error) {
+    console.error(
+      "AWS S3 API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: "Failed to fetch S3 buckets",
+      message: error.message,
     });
   }
 });
