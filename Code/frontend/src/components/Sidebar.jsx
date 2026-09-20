@@ -7,8 +7,6 @@ function Sidebar({ activeItem, onNavigate }) {
     "Issues",
     "AWS",
     "Terraform",
-    "Resources",
-    "Clusters",
     "Settings",
   ];
 
