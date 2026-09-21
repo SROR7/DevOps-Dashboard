@@ -1,64 +1,34 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Aws() {
+  const navigate = useNavigate();
+
   const [data, setData] = useState(null);
-  const [instances, setInstances] = useState([]);
-  const [buckets, setBuckets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const region = "eu-north-1";
+
   useEffect(() => {
-    const fetchAwsData = async () => {
+    const fetchAwsOverview = async () => {
       try {
-        const [
-          overviewResponse,
-          ec2Response,
-          s3Response,
-        ] = await Promise.all([
-          fetch(
-            "http://localhost:3000/api/aws/overview"
-          ),
-          fetch(
-            "http://localhost:3000/api/aws/ec2"
-          ),
-          fetch(
-            "http://localhost:3000/api/aws/s3"
-          ),
-        ]);
+        const response = await fetch(
+          "http://localhost:3000/api/aws/overview"
+        );
 
-        if (!overviewResponse.ok) {
+        if (!response.ok) {
           throw new Error(
-            `AWS API returned ${overviewResponse.status}`
+            `AWS API returned ${response.status}`
           );
         }
 
-        if (!ec2Response.ok) {
-          throw new Error(
-            `EC2 API returned ${ec2Response.status}`
-          );
-        }
+        const result = await response.json();
 
-        if (!s3Response.ok) {
-          throw new Error(
-            `S3 API returned ${s3Response.status}`
-          );
-        }
-
-        const overview =
-          await overviewResponse.json();
-
-        const ec2 =
-          await ec2Response.json();
-
-        const s3 =
-          await s3Response.json();
-
-        setData(overview);
-        setInstances(ec2);
-        setBuckets(s3);
+        setData(result);
       } catch (err) {
         console.error(
-          "Failed to fetch AWS data:",
+          "Failed to fetch AWS overview:",
           err
         );
 
@@ -68,19 +38,25 @@ function Aws() {
       }
     };
 
-    fetchAwsData();
+    fetchAwsOverview();
   }, []);
+
+  const openAwsConsole = (url) => {
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
 
   if (loading) {
     return (
       <section className="content">
         <div className="page-header">
-          <h1 className="page-title">
-            AWS
-          </h1>
+          <h1 className="page-title">AWS</h1>
 
           <p className="page-description">
-            Monitor your AWS infrastructure.
+            Manage and monitor your AWS infrastructure.
           </p>
         </div>
 
@@ -88,7 +64,7 @@ function Aws() {
           <h3>Loading AWS resources...</h3>
 
           <p>
-            Fetching data from AWS.
+            Fetching your AWS account information.
           </p>
         </div>
       </section>
@@ -99,12 +75,10 @@ function Aws() {
     return (
       <section className="content">
         <div className="page-header">
-          <h1 className="page-title">
-            AWS
-          </h1>
+          <h1 className="page-title">AWS</h1>
 
           <p className="page-description">
-            Monitor your AWS infrastructure.
+            Manage and monitor your AWS infrastructure.
           </p>
         </div>
 
@@ -117,45 +91,158 @@ function Aws() {
     );
   }
 
+  const resources = [
+    {
+      name: "EC2",
+      description:
+        "Manage and monitor your EC2 instances.",
+      count: data.ec2?.total || 0,
+      label: "instances",
+      icon: "E",
+      path: "/aws/ec2",
+      consoleUrl:
+        `https://${region}.console.aws.amazon.com/ec2/home?region=${region}#Instances`,
+    },
+
+    {
+      name: "S3",
+      description:
+        "Manage your S3 buckets and storage.",
+      count: data.s3?.total || 0,
+      label: "buckets",
+      icon: "S",
+      path: "/aws/s3",
+      consoleUrl:
+        `https://s3.console.aws.amazon.com/s3/home?region=${region}`,
+    },
+
+    {
+      name: "EKS",
+      description:
+        "Manage your Kubernetes clusters.",
+      count: data.eks?.total || 0,
+      label: "clusters",
+      icon: "K",
+      path: "/aws/eks",
+      consoleUrl:
+        `https://${region}.console.aws.amazon.com/eks/home?region=${region}#/clusters`,
+    },
+
+    {
+      name: "RDS",
+      description:
+        "Manage your relational databases.",
+      count: data.rds?.total || 0,
+      label: "databases",
+      icon: "R",
+      path: "/aws/rds",
+      consoleUrl:
+        `https://${region}.console.aws.amazon.com/rds/home?region=${region}#databases:`,
+    },
+  ];
+
   return (
     <section className="content">
-      <div className="page-header">
-        <h1 className="page-title">
-          AWS
-        </h1>
 
-        <p className="page-description">
-          Monitor your AWS infrastructure.
-        </p>
+      {/* Page Header */}
+
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">
+            AWS
+          </h1>
+
+          <p className="page-description">
+            Manage and monitor your AWS infrastructure.
+          </p>
+        </div>
       </div>
 
-      <div className="card actions-repository-selector">
-        <div className="card-header">
+
+      {/* AWS Account */}
+
+      <div className="aws-account-card">
+
+        <div className="aws-account-header">
+
+          <div className="aws-account-icon">
+            AWS
+          </div>
+
           <div>
-            <h2 className="card-title">
+            <h2>
               AWS Account
             </h2>
 
-            <p className="card-subtitle">
+            <p>
               Connected AWS environment
             </p>
           </div>
-        </div>
 
-        <div className="repository-meta">
-          <span>
-            Account: {data.accountId}
+          <span className="aws-connected-badge">
+            ● Connected
           </span>
 
-          <span>
-            Region: {data.region}
-          </span>
         </div>
+
+
+        <div className="aws-account-details">
+
+          <div className="aws-account-detail">
+
+            <span className="aws-detail-label">
+              Account ID
+            </span>
+
+            <strong>
+              {data.accountId || "-"}
+            </strong>
+
+          </div>
+
+
+          <div className="aws-account-detail">
+
+            <span className="aws-detail-label">
+              Region
+            </span>
+
+            <strong>
+              {data.region || region}
+            </strong>
+
+          </div>
+
+        </div>
+
       </div>
 
+
+      {/* Overview */}
+
+      <div className="section-header">
+
+        <div>
+          <h2 className="section-title">
+            Overview
+          </h2>
+
+          <p className="card-subtitle">
+            Current AWS infrastructure summary
+          </p>
+        </div>
+
+      </div>
+
+
       <div className="stats-grid">
+
+        {/* EC2 */}
+
         <div className="stat-card">
+
           <div className="stat-header">
+
             <span className="stat-title">
               EC2
             </span>
@@ -163,20 +250,27 @@ function Aws() {
             <div className="stat-icon">
               E
             </div>
+
           </div>
 
           <h2 className="stat-value">
-            {data.ec2.total}
+            {data.ec2?.total || 0}
           </h2>
 
           <div className="stat-footer">
-            {data.ec2.running} running ·{" "}
-            {data.ec2.stopped} stopped
+            {data.ec2?.running || 0} running ·{" "}
+            {data.ec2?.stopped || 0} stopped
           </div>
+
         </div>
 
+
+        {/* S3 */}
+
         <div className="stat-card">
+
           <div className="stat-header">
+
             <span className="stat-title">
               S3
             </span>
@@ -184,19 +278,26 @@ function Aws() {
             <div className="stat-icon">
               S
             </div>
+
           </div>
 
           <h2 className="stat-value">
-            {data.s3.total}
+            {data.s3?.total || 0}
           </h2>
 
           <div className="stat-footer">
             S3 buckets
           </div>
+
         </div>
 
+
+        {/* EKS */}
+
         <div className="stat-card">
+
           <div className="stat-header">
+
             <span className="stat-title">
               EKS
             </span>
@@ -204,19 +305,26 @@ function Aws() {
             <div className="stat-icon">
               K
             </div>
+
           </div>
 
           <h2 className="stat-value">
-            {data.eks.total}
+            {data.eks?.total || 0}
           </h2>
 
           <div className="stat-footer">
             Kubernetes clusters
           </div>
+
         </div>
 
+
+        {/* RDS */}
+
         <div className="stat-card">
+
           <div className="stat-header">
+
             <span className="stat-title">
               RDS
             </span>
@@ -224,230 +332,129 @@ function Aws() {
             <div className="stat-icon">
               R
             </div>
+
           </div>
 
           <h2 className="stat-value">
-            {data.rds.total}
+            {data.rds?.total || 0}
           </h2>
 
           <div className="stat-footer">
             Database instances
           </div>
+
         </div>
+
       </div>
 
+
+      {/* AWS Resources */}
+
       <div className="section-header">
+
         <div>
           <h2 className="section-title">
-            EC2 Instances
+            AWS Resources
           </h2>
 
           <p className="card-subtitle">
-            EC2 instances in {data.region}
+            Select a resource to view its details.
           </p>
         </div>
+
       </div>
 
-      {instances.length === 0 ? (
-        <div className="empty-state">
-          <h3>No EC2 instances found</h3>
 
-          <p>
-            There are no EC2 instances in this
-            region.
-          </p>
-        </div>
-      ) : (
-        <div className="repositories-grid">
-          {instances.map((instance) => (
-            <div
-              className="repository-card"
-              key={instance.id}
-            >
-              <div className="repository-header">
-                <div className="repository-name">
-                  <div className="repository-icon">
-                    E
-                  </div>
+      <div className="aws-resources-grid">
 
-                  <span>
-                    {instance.name}
-                  </span>
-                </div>
+        {resources.map((resource) => (
 
-                <span
-                  className={`status-badge ${
-                    instance.state === "running"
-                      ? "status-success"
-                      : instance.state === "stopped"
-                      ? "status-warning"
-                      : "status-info"
-                  }`}
-                >
-                  {instance.state}
-                </span>
+          <div
+            className="aws-resource-card"
+            key={resource.name}
+            onClick={() =>
+              navigate(resource.path)
+            }
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+
+              if (
+                event.key === "Enter" ||
+                event.key === " "
+              ) {
+                navigate(resource.path);
+              }
+
+            }}
+          >
+
+            <div>
+
+              <div className="aws-resource-icon">
+                {resource.icon}
               </div>
 
-              <p className="repository-description">
-                {instance.id}
-              </p>
 
-              <div className="repository-meta">
-                <span>
-                  Type: {instance.type}
-                </span>
+              <div className="aws-resource-content">
 
-                <span>
-                  AZ: {instance.availabilityZone}
-                </span>
-              </div>
+                <h2>
+                  {resource.name}
+                </h2>
 
-              <div
-                style={{
-                  marginTop: "12px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}
-              >
-                <span className="repository-meta">
-                  Private IP:{" "}
-                  {instance.privateIp}
-                </span>
-
-                <span className="repository-meta">
-                  Public IP:{" "}
-                  {instance.publicIp}
-                </span>
-
-                <span className="repository-meta">
-                  AMI: {instance.ami}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="section-header">
-        <div>
-          <h2 className="section-title">
-            S3 Buckets
-          </h2>
-
-          <p className="card-subtitle">
-            S3 buckets available in your AWS
-            account
-          </p>
-        </div>
-      </div>
-
-      {buckets.length === 0 ? (
-        <div className="empty-state">
-          <h3>No S3 buckets found</h3>
-
-          <p>
-            There are no S3 buckets in this
-            AWS account.
-          </p>
-        </div>
-      ) : (
-        <div className="repositories-grid">
-          {buckets.map((bucket) => (
-            <div
-              className="repository-card"
-              key={bucket.name}
-            >
-              <div className="repository-header">
-                <div className="repository-name">
-                  <div className="repository-icon">
-                    S
-                  </div>
-
-                  <span>
-                    {bucket.name}
-                  </span>
-                </div>
-
-                <span className="status-badge status-success">
-                  S3
-                </span>
-              </div>
-
-              <p className="repository-description">
-                Amazon S3 bucket.
-              </p>
-
-              <div className="repository-meta">
-                <span>
-                  Created:{" "}
-                  {bucket.creationDate
-                    ? new Date(
-                        bucket.creationDate
-                      ).toLocaleDateString()
-                    : "-"}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="section-header">
-        <div>
-          <h2 className="section-title">
-            EKS Clusters
-          </h2>
-
-          <p className="card-subtitle">
-            Kubernetes clusters in{" "}
-            {data.region}
-          </p>
-        </div>
-      </div>
-
-      {data.eks.clusters.length === 0 ? (
-        <div className="empty-state">
-          <h3>No EKS clusters found</h3>
-
-          <p>
-            There are no EKS clusters in this
-            region.
-          </p>
-        </div>
-      ) : (
-        <div className="repositories-grid">
-          {data.eks.clusters.map(
-            (cluster) => (
-              <div
-                className="repository-card"
-                key={cluster}
-              >
-                <div className="repository-header">
-                  <div className="repository-name">
-                    <div className="repository-icon">
-                      K
-                    </div>
-
-                    <span>
-                      {cluster}
-                    </span>
-                  </div>
-
-                  <span className="status-badge status-success">
-                    EKS
-                  </span>
-                </div>
-
-                <p className="repository-description">
-                  Amazon Elastic Kubernetes
-                  Service cluster.
+                <p>
+                  {resource.description}
                 </p>
+
+
+                <div className="aws-resource-stats">
+
+                  <strong>
+                    {resource.count}
+                  </strong>
+
+                  <span>
+                    {resource.label}
+                  </span>
+
+                </div>
+
               </div>
-            )
-          )}
-        </div>
-      )}
+
+            </div>
+
+
+            {/* AWS Console Button */}
+
+            <button
+              type="button"
+              className="aws-console-button"
+              onClick={(event) => {
+
+                event.stopPropagation();
+
+                openAwsConsole(
+                  resource.consoleUrl
+                );
+
+              }}
+            >
+              Open AWS Console
+            </button>
+
+
+            {/* Arrow */}
+
+            <div className="aws-resource-arrow">
+              →
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
     </section>
   );
 }

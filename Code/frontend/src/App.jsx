@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Sidebar from "./components/Sidebar";
+
 import Github from "./pages/Github";
 import Actions from "./pages/Actions";
 import PullRequests from "./pages/PullRequests";
 import Issues from "./pages/Issues";
+
 import Aws from "./pages/Aws";
+import Ec2 from "./pages/Ec2";
+import S3 from "./pages/S3";
+import Eks from "./pages/Eks";
+import Rds from "./pages/Rds";
+
 import "./index.css";
 
 function Dashboard() {
@@ -140,127 +148,131 @@ function Dashboard() {
   );
 }
 
-function App() {
-  const [activeItem, setActiveItem] = useState("Dashboard");
+function Terraform() {
+  return (
+    <section className="content">
+      <div className="page-header">
+        <h1 className="page-title">Terraform</h1>
 
-  const renderPage = () => {
-    switch (activeItem) {
-      case "Dashboard":
-        return <Dashboard />;
+        <p className="page-description">
+          Manage your Terraform infrastructure.
+        </p>
+      </div>
 
-      case "Repositories":
-        return <Github />;
+      <div className="empty-state">
+        <h3>Terraform</h3>
 
-      case "Actions":
-        return <Actions />;
-        
-      case "Pull Requests":
-        return <PullRequests />;
+        <p>
+          Terraform integration is coming next.
+        </p>
+      </div>
+    </section>
+  );
+}
 
-      case "Issues":
-        return <Issues />;
-    
-      case "AWS":
-        return <Aws />;
+function Settings() {
+  return (
+    <section className="content">
+      <div className="page-header">
+        <h1 className="page-title">Settings</h1>
 
-      case "Terraform":
-        return (
-          <section className="content">
-            <div className="page-header">
-              <h1 className="page-title">Terraform</h1>
+        <p className="page-description">
+          Configure your DevOps Dashboard.
+        </p>
+      </div>
 
-              <p className="page-description">
-                Manage your Terraform infrastructure.
-              </p>
-            </div>
+      <div className="empty-state">
+        <h3>Settings</h3>
 
-            <div className="empty-state">
-              <h3>Terraform</h3>
-              <p>
-                Terraform integration is coming next.
-              </p>
-            </div>
-          </section>
-        );
+        <p>
+          Dashboard settings will be available here.
+        </p>
+      </div>
+    </section>
+  );
+}
 
-      case "Resources":
-        return (
-          <section className="content">
-            <div className="page-header">
-              <h1 className="page-title">Resources</h1>
-
-              <p className="page-description">
-                Monitor your cloud resources.
-              </p>
-            </div>
-
-            <div className="empty-state">
-              <h3>AWS Resources</h3>
-              <p>
-                AWS integration is coming next.
-              </p>
-            </div>
-          </section>
-        );
-
-      case "Clusters":
-        return (
-          <section className="content">
-            <div className="page-header">
-              <h1 className="page-title">Clusters</h1>
-
-              <p className="page-description">
-                Manage Kubernetes clusters and workloads.
-              </p>
-            </div>
-
-            <div className="empty-state">
-              <h3>Kubernetes</h3>
-              <p>
-                Kubernetes integration is coming next.
-              </p>
-            </div>
-          </section>
-        );
-
-      case "Settings":
-        return (
-          <section className="content">
-            <div className="page-header">
-              <h1 className="page-title">Settings</h1>
-
-              <p className="page-description">
-                Configure your DevOps Dashboard.
-              </p>
-            </div>
-
-            <div className="empty-state">
-              <h3>Settings</h3>
-              <p>
-                Dashboard settings will be available here.
-              </p>
-            </div>
-          </section>
-        );
-
-      default:
-        return <Dashboard />;
-    }
-  };
-
+function AppLayout() {
   return (
     <div className="app">
       <div className="app-layout">
-        <Sidebar
-          activeItem={activeItem}
-          onNavigate={setActiveItem}
-        />
+        <Sidebar />
 
         <main className="main">
-          {renderPage()}
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+
+            <Route
+              path="/repositories"
+              element={<Github />}
+            />
+
+            <Route
+              path="/actions"
+              element={<Actions />}
+            />
+
+            <Route
+              path="/pull-requests"
+              element={<PullRequests />}
+            />
+
+            <Route
+              path="/issues"
+              element={<Issues />}
+            />
+
+            <Route
+              path="/aws"
+              element={<Aws />}
+            />
+
+            <Route
+              path="/aws/ec2"
+              element={<Ec2 />}
+            />
+
+            <Route
+              path="/aws/s3"
+              element={<S3 />}
+            />
+
+            <Route
+              path="/aws/eks"
+              element={<Eks />}
+            />
+
+            <Route
+              path="/aws/rds"
+              element={<Rds />}
+            />
+
+            <Route
+              path="/terraform"
+              element={<Terraform />}
+            />
+
+            <Route
+              path="/settings"
+              element={<Settings />}
+            />
+
+            <Route
+              path="*"
+              element={<Navigate to="/" replace />}
+            />
+          </Routes>
         </main>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppLayout />
+    </BrowserRouter>
   );
 }
 

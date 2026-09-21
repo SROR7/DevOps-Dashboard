@@ -9,6 +9,7 @@ const {
   getAwsOverview,
   getEc2Instances,
   getS3Buckets,
+  getRdsDatabases,
 } = require("./aws");
 
 const app = express();
@@ -217,6 +218,20 @@ app.get("/api/aws/s3", async (req, res) => {
 
     res.status(500).json({
       error: "Failed to fetch S3 buckets",
+      message: error.message,
+    });
+  }
+});
+
+app.get("/api/aws/rds", async (req, res) => {
+  try {
+    const databases = await getRdsDatabases();
+    res.json(databases);
+  } catch (error) {
+    console.error("Failed to fetch RDS databases:", error);
+
+    res.status(500).json({
+      error: "Failed to fetch RDS databases",
       message: error.message,
     });
   }

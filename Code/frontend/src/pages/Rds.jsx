@@ -1,73 +1,82 @@
 import { useEffect, useState } from "react";
 
-function Ec2() {
-  const [instances, setInstances] = useState([]);
+function Rds() {
+  const [databases, setDatabases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const region = "eu-north-1";
 
   useEffect(() => {
-    const fetchInstances = async () => {
+    const fetchDatabases = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/aws/ec2"
+          "http://localhost:3000/api/aws/rds"
         );
 
         if (!response.ok) {
-          throw new Error(`EC2 API returned ${response.status}`);
+          throw new Error(`RDS API returned ${response.status}`);
         }
 
         const data = await response.json();
-        setInstances(data);
+        setDatabases(data);
       } catch (err) {
-        console.error("Failed to fetch EC2 instances:", err);
+        console.error("Failed to fetch RDS databases:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInstances();
+    fetchDatabases();
   }, []);
 
   const openAwsConsole = () => {
     window.open(
-      `https://${region}.console.aws.amazon.com/ec2/home?region=${region}#Instances`,
+      `https://${region}.console.aws.amazon.com/rds/home?region=${region}#databases:`,
       "_blank",
       "noopener,noreferrer"
     );
   };
 
-  const getStatusClass = (state) => {
-    switch (state) {
-      case "running":
-        return "status-success";
-
-      case "stopped":
-        return "status-warning";
-
-      case "terminated":
-        return "status-error";
-
-      default:
-        return "status-info";
+  const getStatusClass = (status) => {
+    if (status === "available") {
+      return "status-success";
     }
+
+    if (
+      status === "stopped" ||
+      status === "stopping" ||
+      status === "starting"
+    ) {
+      return "status-warning";
+    }
+
+    if (
+      status === "failed" ||
+      status === "inaccessible-encryption-credentials"
+    ) {
+      return "status-error";
+    }
+
+    return "status-info";
   };
 
   if (loading) {
     return (
       <section className="content">
         <div className="page-header">
-          <h1 className="page-title">EC2 Instances</h1>
+          <h1 className="page-title">RDS Databases</h1>
+
           <p className="page-description">
-            Manage and monitor your Amazon EC2 instances.
+            Manage and monitor your Amazon RDS databases.
           </p>
         </div>
 
         <div className="empty-state">
-          <h3>Loading EC2 instances...</h3>
-          <p>Fetching instances from AWS.</p>
+          <h3>Loading RDS databases...</h3>
+
+          <p>Fetching databases from AWS.</p>
         </div>
       </section>
     );
@@ -77,28 +86,38 @@ function Ec2() {
     return (
       <section className="content">
         <div className="page-header">
-          <h1 className="page-title">EC2 Instances</h1>
+          <h1 className="page-title">RDS Databases</h1>
+
           <p className="page-description">
-            Manage and monitor your Amazon EC2 instances.
+            Manage and monitor your Amazon RDS databases.
           </p>
         </div>
 
         <div className="empty-state">
-          <h3>Failed to load EC2 instances</h3>
+          <h3>Failed to load RDS databases</h3>
+
           <p>{error}</p>
         </div>
       </section>
     );
   }
 
+  const availableDatabases = databases.filter(
+    (database) => database.status === "available"
+  );
+
+  const stoppedDatabases = databases.filter(
+    (database) => database.status === "stopped"
+  );
+
   return (
     <section className="content">
       <div className="page-header">
         <div>
-          <h1 className="page-title">EC2 Instances</h1>
+          <h1 className="page-title">RDS Databases</h1>
 
           <p className="page-description">
-            Manage and monitor your Amazon EC2 instances.
+            Manage and monitor your Amazon RDS databases.
           </p>
         </div>
 
@@ -114,60 +133,64 @@ function Ec2() {
         <div className="stat-card">
           <div className="stat-header">
             <span className="stat-title">Total</span>
-            <div className="stat-icon">E</div>
+
+            <div className="stat-icon">
+              R
+            </div>
           </div>
 
           <h2 className="stat-value">
-            {instances.length}
+            {databases.length}
           </h2>
 
           <div className="stat-footer">
-            EC2 instances
+            Database instances
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-header">
-            <span className="stat-title">Running</span>
-            <div className="stat-icon">R</div>
+            <span className="stat-title">Available</span>
+
+            <div className="stat-icon">
+              A
+            </div>
           </div>
 
           <h2 className="stat-value">
-            {
-              instances.filter(
-                (instance) => instance.state === "running"
-              ).length
-            }
+            {availableDatabases.length}
           </h2>
 
           <div className="stat-footer">
-            Running instances
+            Available databases
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-header">
             <span className="stat-title">Stopped</span>
-            <div className="stat-icon">S</div>
+
+            <div className="stat-icon">
+              S
+            </div>
           </div>
 
           <h2 className="stat-value">
-            {
-              instances.filter(
-                (instance) => instance.state === "stopped"
-              ).length
-            }
+            {stoppedDatabases.length}
           </h2>
 
           <div className="stat-footer">
-            Stopped instances
+            Stopped databases
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-header">
             <span className="stat-title">Region</span>
-            <div className="stat-icon">A</div>
+
+            <div className="stat-icon">
+              A
+            </div>
           </div>
 
           <h2 className="stat-value">
@@ -183,94 +206,94 @@ function Ec2() {
       <div className="section-header">
         <div>
           <h2 className="section-title">
-            EC2 Instances
+            Database Instances
           </h2>
 
           <p className="card-subtitle">
-            Instances running in {region}
+            RDS databases in {region}
           </p>
         </div>
       </div>
 
-      {instances.length === 0 ? (
+      {databases.length === 0 ? (
         <div className="empty-state">
-          <h3>No EC2 instances found</h3>
+          <h3>No RDS databases found</h3>
 
           <p>
-            There are no EC2 instances in {region}.
+            There are no RDS database instances in {region}.
           </p>
         </div>
       ) : (
         <div className="repositories-grid">
-          {instances.map((instance) => (
+          {databases.map((database) => (
             <div
               className="repository-card"
-              key={instance.id}
+              key={database.id}
             >
               <div className="repository-header">
                 <div className="repository-name">
                   <div className="repository-icon">
-                    E
+                    R
                   </div>
 
                   <span>
-                    {instance.name}
+                    {database.id}
                   </span>
                 </div>
 
                 <span
                   className={`status-badge ${getStatusClass(
-                    instance.state
+                    database.status
                   )}`}
                 >
-                  {instance.state}
+                  {database.status}
                 </span>
               </div>
 
               <p className="repository-description">
-                {instance.id}
+                Amazon RDS database instance.
               </p>
 
               <div className="repository-meta">
                 <span>
-                  Type: {instance.type}
+                  Engine: {database.engine || "-"}
                 </span>
 
                 <span>
-                  AZ: {instance.availabilityZone}
+                  Class: {database.instanceClass || "-"}
                 </span>
               </div>
 
               <div className="ec2-instance-details">
                 <div>
-                  <span>Private IP</span>
+                  <span>Endpoint</span>
+
                   <strong>
-                    {instance.privateIp}
+                    {database.endpoint || "-"}
                   </strong>
                 </div>
 
                 <div>
-                  <span>Public IP</span>
+                  <span>Port</span>
+
                   <strong>
-                    {instance.publicIp}
+                    {database.port || "-"}
                   </strong>
                 </div>
 
                 <div>
-                  <span>AMI</span>
+                  <span>Availability Zone</span>
+
                   <strong>
-                    {instance.ami}
+                    {database.availabilityZone || "-"}
                   </strong>
                 </div>
 
                 <div>
-                  <span>Launch Time</span>
+                  <span>Engine Version</span>
+
                   <strong>
-                    {instance.launchTime
-                      ? new Date(
-                          instance.launchTime
-                        ).toLocaleString()
-                      : "-"}
+                    {database.engineVersion || "-"}
                   </strong>
                 </div>
               </div>
@@ -282,4 +305,4 @@ function Ec2() {
   );
 }
 
-export default Ec2;
+export default Rds;

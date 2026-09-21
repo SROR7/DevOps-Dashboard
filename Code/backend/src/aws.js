@@ -26,11 +26,25 @@ const {
 const region =
   process.env.AWS_REGION || "eu-north-1";
 
-const sts = new STSClient({ region });
-const ec2 = new EC2Client({ region });
-const s3 = new S3Client({ region });
-const eks = new EKSClient({ region });
-const rds = new RDSClient({ region });
+const sts = new STSClient({
+  region,
+});
+
+const ec2 = new EC2Client({
+  region,
+});
+
+const s3 = new S3Client({
+  region,
+});
+
+const eks = new EKSClient({
+  region,
+});
+
+const rds = new RDSClient({
+  region,
+});
 
 async function getAwsOverview() {
   const [
@@ -117,27 +131,38 @@ async function getEc2Instances() {
     ) || [];
 
   return instances.map((instance) => {
-    const nameTag = instance.Tags?.find(
-      (tag) => tag.Key === "Name"
-    );
+    const nameTag =
+      instance.Tags?.find(
+        (tag) =>
+          tag.Key === "Name"
+      );
 
     return {
-      id: instance.InstanceId,
+      id:
+        instance.InstanceId,
+
       name:
         nameTag?.Value || "Unnamed",
+
       state:
         instance.State?.Name || "unknown",
+
       type:
         instance.InstanceType || "unknown",
+
       privateIp:
         instance.PrivateIpAddress || "-",
+
       publicIp:
         instance.PublicIpAddress || "-",
+
       availabilityZone:
         instance.Placement
           ?.AvailabilityZone || "-",
+
       ami:
         instance.ImageId || "-",
+
       launchTime:
         instance.LaunchTime || null,
     };
@@ -150,11 +175,51 @@ async function getS3Buckets() {
   );
 
   return (
-    response.Buckets?.map((bucket) => ({
-      name: bucket.Name,
-      creationDate:
-        bucket.CreationDate || null,
-    })) || []
+    response.Buckets?.map(
+      (bucket) => ({
+        name:
+          bucket.Name,
+
+        creationDate:
+          bucket.CreationDate || null,
+      })
+    ) || []
+  );
+}
+
+async function getRdsDatabases() {
+  const response = await rds.send(
+    new DescribeDBInstancesCommand({})
+  );
+
+  return (
+    response.DBInstances?.map(
+      (database) => ({
+        id:
+          database.DBInstanceIdentifier || "-",
+
+        status:
+          database.DBInstanceStatus || "unknown",
+
+        engine:
+          database.Engine || "-",
+
+        instanceClass:
+          database.DBInstanceClass || "-",
+
+        endpoint:
+          database.Endpoint?.Address || "-",
+
+        port:
+          database.Endpoint?.Port || "-",
+
+        availabilityZone:
+          database.AvailabilityZone || "-",
+
+        engineVersion:
+          database.EngineVersion || "-",
+      })
+    ) || []
   );
 }
 
@@ -162,4 +227,5 @@ module.exports = {
   getAwsOverview,
   getEc2Instances,
   getS3Buckets,
+  getRdsDatabases,
 };

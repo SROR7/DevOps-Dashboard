@@ -1,13 +1,39 @@
-function Sidebar({ activeItem, onNavigate }) {
+import { NavLink } from "react-router-dom";
+
+function Sidebar() {
   const menuItems = [
-    "Dashboard",
-    "Repositories",
-    "Actions",
-    "Pull Requests",
-    "Issues",
-    "AWS",
-    "Terraform",
-    "Settings",
+    {
+      name: "Dashboard",
+      path: "/",
+    },
+    {
+      name: "Repositories",
+      path: "/repositories",
+    },
+    {
+      name: "Actions",
+      path: "/actions",
+    },
+    {
+      name: "Pull Requests",
+      path: "/pull-requests",
+    },
+    {
+      name: "Issues",
+      path: "/issues",
+    },
+    {
+      name: "AWS",
+      path: "/aws",
+    },
+    {
+      name: "Terraform",
+      path: "/terraform",
+    },
+    {
+      name: "Settings",
+      path: "/settings",
+    },
   ];
 
   return (
@@ -23,15 +49,15 @@ function Sidebar({ activeItem, onNavigate }) {
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => (
-          <button
-            key={item}
-            className={`nav-item ${
-              activeItem === item ? "active" : ""
-            }`}
-            onClick={() => onNavigate(item)}
+          <NavLink
+            key={item.name}
+            to={item.path}
+            className={({ isActive }) =>
+              `nav-item ${isActive ? "active" : ""}`
+            }
           >
-            {item}
-          </button>
+            {item.name}
+          </NavLink>
         ))}
       </nav>
 
