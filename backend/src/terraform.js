@@ -72,7 +72,155 @@ function getTerraformProjects() {
     });
 }
 
+function getProjectsDirectory() {
+  return path.resolve(
+    process.env.TERRAFORM_PROJECTS_DIR ||
+      path.join(process.cwd(), "terraform-projects")
+  );
+}
+
+function validateTerraformProject(projectName) {
+  const projectsDir = getProjectsDirectory();
+
+  const projectPath = path.resolve(
+    projectsDir,
+    projectName
+  );
+
+  const relativePath = path.relative(
+    projectsDir,
+    projectPath
+  );
+
+  if (
+    relativePath.startsWith("..") ||
+    path.isAbsolute(relativePath)
+  ) {
+    throw new Error("Invalid Terraform project");
+  }
+
+  if (!fs.existsSync(projectPath)) {
+    throw new Error("Terraform project not found");
+  }
+
+  if (!fs.statSync(projectPath).isDirectory()) {
+    throw new Error("Terraform project is not a directory");
+  }
+
+  const hasTerraformFile = fs
+    .readdirSync(projectPath)
+    .some((file) => file.endsWith(".tf"));
+
+  if (!hasTerraformFile) {
+    throw new Error(
+      "Directory does not contain Terraform files"
+    );
+  }
+
+  return projectPath;
+}
+
+function runTerraformCommand(
+  terraformPath,
+  args,
+  cwd
+) {
+  return new Promise((resolve, reject) => {
+    execFile(
+      terraformPath,
+      args,
+      {
+        cwd,
+        maxBuffer: 10 * 1024 * 1024,
+      },
+      (error, stdout, stderr) => {
+        if (error) {
+          const output =
+            stdout || stderr || error.message;
+
+          reject(
+            new Error(output.trim())
+          );
+
+          return;
+        }
+
+        resolve({
+          stdout: stdout.trim(),
+          stderr: stderr.trim(),
+        });
+      }
+    );
+  });
+}
+
+async function runTerraformPlan(
+  projectName
+) {
+  const terraformPath = await install(outputs);
+
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  await runTerraformCommand(
+    terraformPath,
+    ["init", "-input=false"],
+    projectPath
+  );
+
+  const planResult =
+    await runTerraformCommand(
+      terraformPath,
+      [
+        "plan",
+        "-input=false",
+        "-no-color",
+      ],
+      projectPath
+    );
+
+  return {
+    project: projectName,
+    path: projectPath,
+    output: planResult.stdout,
+  };
+}
+
+function getTerraformProject(projectName) {
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  const files = fs
+    .readdirSync(projectPath, {
+      withFileTypes: true,
+    })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name);
+
+  const terraformFiles = files.filter((file) =>
+    file.endsWith(".tf")
+  );
+
+  const variableFiles = files.filter(
+    (file) =>
+      file === "terraform.tfvars" ||
+      file === "terraform.tfvars.json" ||
+      file.endsWith(".auto.tfvars") ||
+      file.endsWith(".auto.tfvars.json")
+  );
+
+  return {
+    name: projectName,
+    path: projectPath,
+    files,
+    terraformFiles,
+    variableFiles,
+  };
+}
+
 module.exports = {
   getTerraformStatus,
   getTerraformProjects,
+  runTerraformPlan,
+  getTerraformProject,
 };

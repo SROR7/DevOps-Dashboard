@@ -1,9 +1,5 @@
 require("dotenv").config();
 
-const {
-  getTerraformStatus,
-} = require("./terraform");
-
 const express = require("express");
 const cors = require("cors");
 
@@ -20,6 +16,8 @@ const {
 const {
   getTerraformStatus,
   getTerraformProjects,
+  runTerraformPlan,
+  getTerraformProject,
 } = require("./terraform");
 
 const app = express();
@@ -302,6 +300,52 @@ app.get("/api/terraform/projects", (req, res) => {
   }
 });
 
+app.post("/api/terraform/plan", async (req, res) => {
+  try {
+    const { project } = req.body;
+
+    if (!project) {
+      return res.status(400).json({
+        error: "Project name is required",
+      });
+    }
+
+    const result = await runTerraformPlan(project);
+
+    res.json(result);
+  } catch (error) {
+    console.error(
+      "Terraform Plan API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: "Terraform plan failed",
+      message: error.message,
+    });
+  }
+});
+
+
+app.get("/api/terraform/projects/:project", (req, res) => {
+  try {
+    const project = getTerraformProject(
+      req.params.project
+    );
+
+    res.json(project);
+  } catch (error) {
+    console.error(
+      "Terraform Project API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: "Failed to fetch Terraform project",
+      message: error.message,
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

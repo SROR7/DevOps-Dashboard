@@ -1717,3 +1717,635 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.terraform-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(320px, 1fr)
+  );
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.terraform-project-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 22px;
+  transition: all 0.2s ease;
+}
+
+.terraform-project-card:hover {
+  border-color: #374151;
+  transform: translateY(-2px);
+}
+
+.terraform-project-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.terraform-project-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.terraform-project-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  font-size: 18px;
+  font-weight: 700;
+  color: #a78bfa;
+}
+
+.terraform-project-title h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.terraform-project-title span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.terraform-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.terraform-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+}
+
+.terraform-project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.terraform-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.terraform-info-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.terraform-info-value {
+  padding: 10px 12px;
+  background: #0b1120;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #d1d5db;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.terraform-project-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.terraform-project-button {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #161f2f;
+  color: #d1d5db;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.terraform-project-button:hover {
+  background: #1f2937;
+  border-color: #4b5563;
+}
+
+.terraform-project-button.primary {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: white;
+}
+
+.terraform-project-button.primary:hover {
+  background: #6d28d9;
+  border-color: #6d28d9;
+}
+
+.terraform-environment-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.terraform-environment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.terraform-environment-item {
+  padding: 20px;
+  border-right: 1px solid #1f2937;
+}
+
+.terraform-environment-item:last-child {
+  border-right: none;
+}
+
+.terraform-environment-item span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.terraform-environment-item strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e5e7eb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.terraform-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 32px;
+  margin-bottom: 16px;
+}
+
+.terraform-section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #f3f4f6;
+}
+
+.terraform-section-description {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.terraform-empty-state {
+  padding: 45px 25px;
+  text-align: center;
+  background: #111827;
+  border: 1px dashed #374151;
+  border-radius: 16px;
+}
+
+.terraform-empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #e5e7eb;
+}
+
+.terraform-empty-state p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+@media (max-width: 900px) {
+  .terraform-environment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .terraform-environment-item {
+    border-bottom: 1px solid #1f2937;
+  }
+
+  .terraform-environment-item:nth-child(2) {
+    border-right: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .terraform-projects-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .terraform-environment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .terraform-environment-item {
+    border-right: none;
+  }
+
+  .terraform-project-actions {
+    flex-direction: column;
+  }
+}
+
+.terraform-plan-output {
+  margin-top: 32px;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.terraform-plan-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.terraform-plan-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.terraform-plan-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  color: #a78bfa;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.terraform-plan-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.terraform-terminal {
+  background: #080d18;
+}
+
+.terraform-terminal-header {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid #1f2937;
+  position: relative;
+}
+
+.terraform-terminal-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.terraform-terminal-dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #374151;
+}
+
+.terraform-terminal-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+.terraform-terminal-output {
+  margin: 0;
+  padding: 22px;
+  max-height: 520px;
+  overflow: auto;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #d1d5db;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.terraform-terminal-output::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.terraform-terminal-output::-webkit-scrollbar-track {
+  background: #080d18;
+}
+
+.terraform-terminal-output::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 999px;
+}
+
+.terraform-terminal-output::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+@media (max-width: 600px) {
+  .terraform-plan-header {
+    align-items: flex-start;
+    gap: 15px;
+    flex-direction: column;
+  }
+
+  .terraform-terminal-output {
+    padding: 16px;
+    font-size: 11px;
+  }
+}
+
+.terraform-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.terraform-back-button:hover {
+  color: #ffffff;
+}
+
+.terraform-project-details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.terraform-detail-card {
+  padding: 22px;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.terraform-detail-card:hover {
+  transform: translateY(-2px);
+  border-color: #374151;
+}
+
+.terraform-detail-label {
+  display: block;
+  margin-bottom: 9px;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.terraform-detail-card strong {
+  display: block;
+  color: #f9fafb;
+  font-size: 18px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.terraform-project-info {
+  margin-bottom: 30px;
+  padding: 20px 22px;
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+}
+
+.terraform-project-info code {
+  display: block;
+  padding: 11px 13px;
+  overflow-x: auto;
+  background: #080d18;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  color: #a78bfa;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.terraform-project-files {
+  margin-top: 30px;
+  padding: 24px;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+}
+
+.terraform-project-files .terraform-section-header {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.terraform-project-files h2 {
+  margin: 0 0 6px;
+  color: #f9fafb;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.terraform-project-files p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.terraform-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.terraform-file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  color: #d1d5db;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 12px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.terraform-file-item:hover {
+  background: #111827;
+  border-color: #374151;
+}
+
+.terraform-file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  color: #a78bfa;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.terraform-project-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.terraform-project-button {
+  min-width: 90px;
+  padding: 10px 17px;
+  border: 1px solid #374151;
+  border-radius: 9px;
+  background: #111827;
+  color: #d1d5db;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.terraform-project-button:hover {
+  background: #1f2937;
+  border-color: #4b5563;
+  transform: translateY(-1px);
+}
+
+.terraform-project-button.primary {
+  border-color: #7c3aed;
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+.terraform-project-button.primary:hover {
+  background: #6d28d9;
+  border-color: #6d28d9;
+}
+
+.terraform-project-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.terraform-empty-state {
+  padding: 45px 25px;
+  text-align: center;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+}
+
+.terraform-empty-state h3 {
+  margin: 0 0 8px;
+  color: #f9fafb;
+  font-size: 17px;
+}
+
+.terraform-empty-state p {
+  margin: 0 0 20px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+@media (max-width: 1000px) {
+  .terraform-project-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .terraform-project-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .terraform-project-files {
+    padding: 18px;
+  }
+
+  .terraform-project-actions {
+    flex-wrap: wrap;
+  }
+
+  .terraform-project-button {
+    flex: 1;
+  }
+
+  .terraform-project-info code {
+    font-size: 10px;
+  }
+}
