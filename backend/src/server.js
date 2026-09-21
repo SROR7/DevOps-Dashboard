@@ -17,6 +17,11 @@ const {
   getRdsDatabases,
 } = require("./aws");
 
+const {
+  getTerraformStatus,
+  getTerraformProjects,
+} = require("./terraform");
+
 const app = express();
 
 app.use(cors());
@@ -274,6 +279,24 @@ app.get("/api/terraform/status", async (req, res) => {
     res.status(500).json({
       installed: false,
       error: "Terraform is not available",
+      message: error.message,
+    });
+  }
+});
+
+app.get("/api/terraform/projects", (req, res) => {
+  try {
+    const projects = getTerraformProjects();
+
+    res.json(projects);
+  } catch (error) {
+    console.error(
+      "Terraform Projects API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: "Failed to fetch Terraform projects",
       message: error.message,
     });
   }
