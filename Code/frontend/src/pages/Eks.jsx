@@ -11,17 +11,24 @@ function Eks() {
     const fetchClusters = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/aws/overview"
+          "http://localhost:3000/api/aws/eks"
         );
 
         if (!response.ok) {
-          throw new Error(`EKS API returned ${response.status}`);
+          throw new Error(
+            `EKS API returned ${response.status}`
+          );
         }
 
         const data = await response.json();
-        setClusters(data.eks?.clusters || []);
+
+        setClusters(data);
       } catch (err) {
-        console.error("Failed to fetch EKS clusters:", err);
+        console.error(
+          "Failed to fetch EKS clusters:",
+          err
+        );
+
         setError(err.message);
       } finally {
         setLoading(false);
@@ -39,11 +46,40 @@ function Eks() {
     );
   };
 
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "ACTIVE":
+        return "status-success";
+
+      case "CREATING":
+      case "UPDATING":
+      case "DELETING":
+        return "status-warning";
+
+      case "FAILED":
+        return "status-error";
+
+      default:
+        return "status-info";
+    }
+  };
+
+  const activeClusters = clusters.filter(
+    (cluster) => cluster.status === "ACTIVE"
+  );
+
+  const failedClusters = clusters.filter(
+    (cluster) => cluster.status === "FAILED"
+  );
+
   if (loading) {
     return (
       <section className="content">
         <div className="page-header">
-          <h1 className="page-title">EKS Clusters</h1>
+          <h1 className="page-title">
+            EKS Clusters
+          </h1>
+
           <p className="page-description">
             Manage and monitor your Amazon EKS clusters.
           </p>
@@ -51,7 +87,10 @@ function Eks() {
 
         <div className="empty-state">
           <h3>Loading EKS clusters...</h3>
-          <p>Fetching clusters from AWS.</p>
+
+          <p>
+            Fetching clusters from AWS.
+          </p>
         </div>
       </section>
     );
@@ -61,7 +100,10 @@ function Eks() {
     return (
       <section className="content">
         <div className="page-header">
-          <h1 className="page-title">EKS Clusters</h1>
+          <h1 className="page-title">
+            EKS Clusters
+          </h1>
+
           <p className="page-description">
             Manage and monitor your Amazon EKS clusters.
           </p>
@@ -69,6 +111,7 @@ function Eks() {
 
         <div className="empty-state">
           <h3>Failed to load EKS clusters</h3>
+
           <p>{error}</p>
         </div>
       </section>
@@ -77,9 +120,13 @@ function Eks() {
 
   return (
     <section className="content">
+
       <div className="page-header">
+
         <div>
-          <h1 className="page-title">EKS Clusters</h1>
+          <h1 className="page-title">
+            EKS Clusters
+          </h1>
 
           <p className="page-description">
             Manage and monitor your Amazon EKS clusters.
@@ -92,13 +139,22 @@ function Eks() {
         >
           Open AWS Console
         </button>
+
       </div>
 
+
       <div className="stats-grid">
+
         <div className="stat-card">
+
           <div className="stat-header">
-            <span className="stat-title">Total</span>
-            <div className="stat-icon">K</div>
+            <span className="stat-title">
+              Total
+            </span>
+
+            <div className="stat-icon">
+              K
+            </div>
           </div>
 
           <h2 className="stat-value">
@@ -108,27 +164,66 @@ function Eks() {
           <div className="stat-footer">
             EKS clusters
           </div>
+
         </div>
 
+
         <div className="stat-card">
+
           <div className="stat-header">
-            <span className="stat-title">Running</span>
-            <div className="stat-icon">R</div>
+            <span className="stat-title">
+              Active
+            </span>
+
+            <div className="stat-icon">
+              A
+            </div>
           </div>
 
           <h2 className="stat-value">
-            {clusters.length}
+            {activeClusters.length}
           </h2>
 
           <div className="stat-footer">
-            Available clusters
+            Active clusters
           </div>
+
         </div>
 
+
         <div className="stat-card">
+
           <div className="stat-header">
-            <span className="stat-title">Region</span>
-            <div className="stat-icon">A</div>
+            <span className="stat-title">
+              Failed
+            </span>
+
+            <div className="stat-icon">
+              F
+            </div>
+          </div>
+
+          <h2 className="stat-value">
+            {failedClusters.length}
+          </h2>
+
+          <div className="stat-footer">
+            Failed clusters
+          </div>
+
+        </div>
+
+
+        <div className="stat-card">
+
+          <div className="stat-header">
+            <span className="stat-title">
+              Region
+            </span>
+
+            <div className="stat-icon">
+              A
+            </div>
           </div>
 
           <h2 className="stat-value">
@@ -138,25 +233,14 @@ function Eks() {
           <div className="stat-footer">
             AWS Region
           </div>
+
         </div>
 
-        <div className="stat-card">
-          <div className="stat-header">
-            <span className="stat-title">Service</span>
-            <div className="stat-icon">K</div>
-          </div>
-
-          <h2 className="stat-value">
-            EKS
-          </h2>
-
-          <div className="stat-footer">
-            Elastic Kubernetes Service
-          </div>
-        </div>
       </div>
 
+
       <div className="section-header">
+
         <div>
           <h2 className="section-title">
             Kubernetes Clusters
@@ -166,54 +250,160 @@ function Eks() {
             EKS clusters in {region}
           </p>
         </div>
+
       </div>
 
+
       {clusters.length === 0 ? (
+
         <div className="empty-state">
-          <h3>No EKS clusters found</h3>
+
+          <h3>
+            No EKS clusters found
+          </h3>
 
           <p>
             There are no EKS clusters in {region}.
           </p>
+
         </div>
+
       ) : (
+
         <div className="repositories-grid">
+
           {clusters.map((cluster) => (
+
             <div
               className="repository-card"
-              key={cluster}
+              key={cluster.name}
             >
+
               <div className="repository-header">
+
                 <div className="repository-name">
+
                   <div className="repository-icon">
                     K
                   </div>
 
-                  <span>{cluster}</span>
+                  <span>
+                    {cluster.name}
+                  </span>
+
                 </div>
 
-                <span className="status-badge status-success">
-                  EKS
+
+                <span
+                  className={`status-badge ${getStatusClass(
+                    cluster.status
+                  )}`}
+                >
+                  {cluster.status}
                 </span>
+
               </div>
+
 
               <p className="repository-description">
                 Amazon Elastic Kubernetes Service cluster.
               </p>
 
+
               <div className="repository-meta">
+
                 <span>
                   Region: {region}
                 </span>
 
                 <span>
-                  Status: Available
+                  Version: {cluster.version}
                 </span>
+
               </div>
+
+
+              <div className="ec2-instance-details">
+
+                <div>
+                  <span>
+                    Kubernetes Version
+                  </span>
+
+                  <strong>
+                    {cluster.version}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>
+                    Platform Version
+                  </span>
+
+                  <strong>
+                    {cluster.platformVersion}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>
+                    Status
+                  </span>
+
+                  <strong>
+                    {cluster.status}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>
+                    Created
+                  </span>
+
+                  <strong>
+                    {cluster.createdAt
+                      ? new Date(
+                          cluster.createdAt
+                        ).toLocaleString()
+                      : "-"}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>
+                    Endpoint
+                  </span>
+
+                  <strong>
+                    {cluster.endpoint || "-"}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>
+                    ARN
+                  </span>
+
+                  <strong>
+                    {cluster.arn || "-"}
+                  </strong>
+                </div>
+
+              </div>
+
             </div>
+
           ))}
+
         </div>
+
       )}
+
     </section>
   );
 }

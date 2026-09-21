@@ -16,6 +16,7 @@ const {
 const {
   EKSClient,
   ListClustersCommand,
+  DescribeClusterCommand,
 } = require("@aws-sdk/client-eks");
 
 const {
@@ -26,25 +27,11 @@ const {
 const region =
   process.env.AWS_REGION || "eu-north-1";
 
-const sts = new STSClient({
-  region,
-});
-
-const ec2 = new EC2Client({
-  region,
-});
-
-const s3 = new S3Client({
-  region,
-});
-
-const eks = new EKSClient({
-  region,
-});
-
-const rds = new RDSClient({
-  region,
-});
+const sts = new STSClient({ region });
+const ec2 = new EC2Client({ region });
+const s3 = new S3Client({ region });
+const eks = new EKSClient({ region });
+const rds = new RDSClient({ region });
 
 async function getAwsOverview() {
   const [
@@ -133,36 +120,26 @@ async function getEc2Instances() {
   return instances.map((instance) => {
     const nameTag =
       instance.Tags?.find(
-        (tag) =>
-          tag.Key === "Name"
+        (tag) => tag.Key === "Name"
       );
 
     return {
-      id:
-        instance.InstanceId,
-
+      id: instance.InstanceId,
       name:
         nameTag?.Value || "Unnamed",
-
       state:
         instance.State?.Name || "unknown",
-
       type:
         instance.InstanceType || "unknown",
-
       privateIp:
         instance.PrivateIpAddress || "-",
-
       publicIp:
         instance.PublicIpAddress || "-",
-
       availabilityZone:
         instance.Placement
           ?.AvailabilityZone || "-",
-
       ami:
         instance.ImageId || "-",
-
       launchTime:
         instance.LaunchTime || null,
     };
@@ -177,14 +154,63 @@ async function getS3Buckets() {
   return (
     response.Buckets?.map(
       (bucket) => ({
-        name:
-          bucket.Name,
-
+        name: bucket.Name,
         creationDate:
           bucket.CreationDate || null,
       })
     ) || []
   );
+}
+
+async function getEksClusters() {
+  const response = await eks.send(
+    new ListClustersCommand({})
+  );
+
+  const clusterNames =
+    response.clusters || [];
+
+  const clusters =
+    await Promise.all(
+      clusterNames.map(
+        async (name) => {
+          const result =
+            await eks.send(
+              new DescribeClusterCommand({
+                name,
+              })
+            );
+
+          const cluster =
+            result.cluster;
+
+          return {
+            name:
+              cluster.name || name,
+
+            status:
+              cluster.status || "unknown",
+
+            version:
+              cluster.version || "-",
+
+            platformVersion:
+              cluster.platformVersion || "-",
+
+            endpoint:
+              cluster.endpoint || "-",
+
+            createdAt:
+              cluster.createdAt || null,
+
+            arn:
+              cluster.arn || "-",
+          };
+        }
+      )
+    );
+
+  return clusters;
 }
 
 async function getRdsDatabases() {
@@ -227,5 +253,6 @@ module.exports = {
   getAwsOverview,
   getEc2Instances,
   getS3Buckets,
+  getEksClusters,
   getRdsDatabases,
 };

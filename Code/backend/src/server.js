@@ -1,5 +1,9 @@
 require("dotenv").config();
 
+const {
+  getTerraformStatus,
+} = require("./terraform");
+
 const express = require("express");
 const cors = require("cors");
 
@@ -9,6 +13,7 @@ const {
   getAwsOverview,
   getEc2Instances,
   getS3Buckets,
+  getEksClusters,
   getRdsDatabases,
 } = require("./aws");
 
@@ -232,6 +237,43 @@ app.get("/api/aws/rds", async (req, res) => {
 
     res.status(500).json({
       error: "Failed to fetch RDS databases",
+      message: error.message,
+    });
+  }
+});
+
+app.get("/api/aws/eks", async (req, res) => {
+  try {
+    const clusters = await getEksClusters();
+
+    res.json(clusters);
+  } catch (error) {
+    console.error(
+      "AWS EKS API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: "Failed to fetch EKS clusters",
+      message: error.message,
+    });
+  }
+});
+
+app.get("/api/terraform/status", async (req, res) => {
+  try {
+    const data = await getTerraformStatus();
+
+    res.json(data);
+  } catch (error) {
+    console.error(
+      "Terraform API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      installed: false,
+      error: "Terraform is not available",
       message: error.message,
     });
   }
