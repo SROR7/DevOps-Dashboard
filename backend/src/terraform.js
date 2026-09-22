@@ -326,6 +326,52 @@ function getTerraformResources(projectName) {
   };
 }
 
+async function getTerraformState(projectName) {
+  const terraformPath = await install(outputs);
+
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  try {
+    const result = await runTerraformCommand(
+      terraformPath,
+      ["state", "list"],
+      projectPath
+    );
+
+    const resources = result.stdout
+      ? result.stdout
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)
+      : [];
+
+    return {
+      project: projectName,
+      path: projectPath,
+      hasState: true,
+      total: resources.length,
+      resources,
+    };
+  } catch (error) {
+    if (
+      error.message.includes(
+        "No state file was found"
+      )
+    ) {
+      return {
+        project: projectName,
+        path: projectPath,
+        hasState: false,
+        total: 0,
+        resources: [],
+      };
+    }
+
+    throw error;
+  }
+}
+
 module.exports = {
   getTerraformStatus,
   getTerraformProjects,
@@ -334,4 +380,5 @@ module.exports = {
   validateTerraformProjectConfig,
   runTerraformInit,
   getTerraformResources,
+  getTerraformState,
 };

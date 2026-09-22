@@ -13,6 +13,11 @@ function TerraformProject() {
   const [resourcesLoading, setResourcesLoading] = useState(true);
   const [resourcesError, setResourcesError] = useState("");
 
+  const [stateResources, setStateResources] = useState([]);
+  const [stateLoading, setStateLoading] = useState(true);
+  const [stateError, setStateError] = useState("");
+  const [hasState, setHasState] = useState(false);
+
   const [planLoading, setPlanLoading] = useState(false);
   const [planOutput, setPlanOutput] = useState("");
   const [planError, setPlanError] = useState("");
@@ -23,8 +28,10 @@ function TerraformProject() {
 
   const [validateLoading, setValidateLoading] =
     useState(false);
+
   const [validateOutput, setValidateOutput] =
     useState("");
+
   const [validateError, setValidateError] =
     useState("");
 
@@ -226,6 +233,44 @@ function TerraformProject() {
     };
 
     fetchResources();
+  }, [projectName]);
+
+  useEffect(() => {
+    const fetchState = async () => {
+      try {
+        setStateLoading(true);
+        setStateError("");
+
+        const response = await fetch(
+          `http://localhost:3000/api/terraform/projects/${encodeURIComponent(
+            projectName
+          )}/state`
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message ||
+              "Failed to fetch Terraform state"
+          );
+        }
+
+        setHasState(result.hasState);
+        setStateResources(result.resources || []);
+      } catch (err) {
+        console.error(
+          "Terraform State Error:",
+          err
+        );
+
+        setStateError(err.message);
+      } finally {
+        setStateLoading(false);
+      }
+    };
+
+    fetchState();
   }, [projectName]);
 
   if (loading) {
@@ -432,6 +477,93 @@ function TerraformProject() {
           )}
       </div>
 
+      <div className="terraform-state-section">
+        <div className="terraform-section-header">
+          <div>
+            <h2>Terraform State</h2>
+
+            <p>
+              Resources currently tracked by Terraform
+              state.
+            </p>
+          </div>
+
+          {!stateLoading &&
+            !stateError && (
+              <span
+                className={`terraform-state-badge ${
+                  hasState
+                    ? "terraform-state-active"
+                    : "terraform-state-empty"
+                }`}
+              >
+                {hasState
+                  ? "State Available"
+                  : "No State"}
+              </span>
+            )}
+        </div>
+
+        {stateLoading && (
+          <div className="terraform-state-empty">
+            Loading Terraform state...
+          </div>
+        )}
+
+        {stateError && (
+          <div className="terraform-state-error">
+            {stateError}
+          </div>
+        )}
+
+        {!stateLoading &&
+          !stateError &&
+          !hasState && (
+            <div className="terraform-state-empty">
+              <strong>
+                No Terraform state found
+              </strong>
+
+              <p>
+                This project has not created a
+                Terraform state file yet.
+              </p>
+            </div>
+          )}
+
+        {!stateLoading &&
+          !stateError &&
+          hasState &&
+          stateResources.length === 0 && (
+            <div className="terraform-state-empty">
+              Terraform state exists, but no resources
+              are currently tracked.
+            </div>
+          )}
+
+        {!stateLoading &&
+          !stateError &&
+          hasState &&
+          stateResources.length > 0 && (
+            <div className="terraform-state-list">
+              {stateResources.map(
+                (resource, index) => (
+                  <div
+                    className="terraform-state-item"
+                    key={`${resource}-${index}`}
+                  >
+                    <span className="terraform-state-icon">
+                      T
+                    </span>
+
+                    <code>{resource}</code>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+      </div>
+
       <div className="terraform-project-actions">
         <button
           className="terraform-project-button"
@@ -517,7 +649,9 @@ function TerraformProject() {
 
       {validateError && (
         <div className="terraform-empty-state">
-          <h3>Terraform Validation Failed</h3>
+          <h3>
+            Terraform Validation Failed
+          </h3>
 
           <p>{validateError}</p>
         </div>

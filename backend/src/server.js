@@ -21,6 +21,7 @@ const {
   validateTerraformProjectConfig,
   runTerraformInit,
   getTerraformResources,
+  getTerraformState,
 } = require("./terraform");
 
 const app = express();
@@ -440,6 +441,31 @@ app.get(
       res.status(500).json({
         error:
           "Failed to fetch Terraform project",
+        message: error.message,
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/terraform/projects/:project/state",
+  async (req, res) => {
+    try {
+      const state =
+        await getTerraformState(
+          req.params.project
+        );
+
+      res.json(state);
+    } catch (error) {
+      console.error(
+        "Terraform State API Error:",
+        error.message
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to fetch Terraform state",
         message: error.message,
       });
     }
