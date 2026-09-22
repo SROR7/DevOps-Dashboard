@@ -9,6 +9,10 @@ function TerraformProject() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [resources, setResources] = useState([]);
+  const [resourcesLoading, setResourcesLoading] = useState(true);
+  const [resourcesError, setResourcesError] = useState("");
+
   const [planLoading, setPlanLoading] = useState(false);
   const [planOutput, setPlanOutput] = useState("");
   const [planError, setPlanError] = useState("");
@@ -29,7 +33,7 @@ function TerraformProject() {
       setInitLoading(true);
       setInitOutput("");
       setInitError("");
-  
+
       const response = await fetch(
         "http://localhost:3000/api/terraform/init",
         {
@@ -42,9 +46,9 @@ function TerraformProject() {
           }),
         }
       );
-  
+
       const result = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(
           result.message ||
@@ -52,19 +56,19 @@ function TerraformProject() {
             "Terraform init failed"
         );
       }
-  
+
       setInitOutput(result.output);
     } catch (err) {
       console.error(
         "Terraform Init Error:",
         err
       );
-    
-        setInitError(err.message);
-      } finally {
-        setInitLoading(false);
-      }
-    };
+
+      setInitError(err.message);
+    } finally {
+      setInitLoading(false);
+    }
+  };
 
   const handleValidate = async () => {
     try {
@@ -187,11 +191,49 @@ function TerraformProject() {
     fetchProject();
   }, [projectName]);
 
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        setResourcesLoading(true);
+        setResourcesError("");
+
+        const response = await fetch(
+          `http://localhost:3000/api/terraform/projects/${encodeURIComponent(
+            projectName
+          )}/resources`
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message ||
+              "Failed to fetch Terraform resources"
+          );
+        }
+
+        setResources(result.resources || []);
+      } catch (err) {
+        console.error(
+          "Terraform Resources Error:",
+          err
+        );
+
+        setResourcesError(err.message);
+      } finally {
+        setResourcesLoading(false);
+      }
+    };
+
+    fetchResources();
+  }, [projectName]);
+
   if (loading) {
     return (
       <div className="page">
         <div className="terraform-empty-state">
           <h3>Loading project...</h3>
+
           <p>
             Fetching Terraform project details.
           </p>
@@ -316,14 +358,90 @@ function TerraformProject() {
         </div>
       </div>
 
+      <div className="terraform-project-resources">
+        <div className="terraform-section-header">
+          <div>
+            <h2>Terraform Resources</h2>
+
+            <p>
+              Resources detected in this Terraform
+              project.
+            </p>
+          </div>
+
+          {!resourcesLoading &&
+            !resourcesError && (
+              <span className="terraform-resource-count">
+                {resources.length} resources
+              </span>
+            )}
+        </div>
+
+        {resourcesLoading && (
+          <div className="terraform-resource-empty">
+            Loading Terraform resources...
+          </div>
+        )}
+
+        {resourcesError && (
+          <div className="terraform-resource-error">
+            {resourcesError}
+          </div>
+        )}
+
+        {!resourcesLoading &&
+          !resourcesError &&
+          resources.length === 0 && (
+            <div className="terraform-resource-empty">
+              No Terraform resources found in this
+              project.
+            </div>
+          )}
+
+        {!resourcesLoading &&
+          !resourcesError &&
+          resources.length > 0 && (
+            <div className="terraform-resource-list">
+              {resources.map(
+                (resource, index) => (
+                  <div
+                    className="terraform-resource-item"
+                    key={`${resource.type}-${resource.name}-${index}`}
+                  >
+                    <div className="terraform-resource-icon">
+                      T
+                    </div>
+
+                    <div className="terraform-resource-content">
+                      <strong>
+                        {resource.name}
+                      </strong>
+
+                      <span>
+                        {resource.type}
+                      </span>
+                    </div>
+
+                    <code>
+                      {resource.file}
+                    </code>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+      </div>
+
       <div className="terraform-project-actions">
-      <button
-        className="terraform-project-button"
-        onClick={handleInit}
-        disabled={initLoading}
-      >
-        {initLoading ? "Initializing..." : "Init"}
-      </button>
+        <button
+          className="terraform-project-button"
+          onClick={handleInit}
+          disabled={initLoading}
+        >
+          {initLoading
+            ? "Initializing..."
+            : "Init"}
+        </button>
 
         <button
           className="terraform-project-button"
@@ -349,6 +467,7 @@ function TerraformProject() {
       {initError && (
         <div className="terraform-empty-state">
           <h3>Terraform Init Failed</h3>
+
           <p>{initError}</p>
         </div>
       )}
@@ -363,6 +482,7 @@ function TerraformProject() {
 
               <div>
                 <h2>Terraform Init</h2>
+
                 <p>
                   Terraform project initialization
                 </p>

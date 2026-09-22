@@ -276,6 +276,56 @@ async function runTerraformInit(projectName) {
   };
 }
 
+function getTerraformResources(projectName) {
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  const files = fs
+    .readdirSync(projectPath, {
+      withFileTypes: true,
+    })
+    .filter((entry) => entry.isFile())
+    .filter((entry) =>
+      entry.name.endsWith(".tf")
+    );
+
+  const resources = [];
+
+  for (const file of files) {
+    const filePath = path.join(
+      projectPath,
+      file.name
+    );
+
+    const content = fs.readFileSync(
+      filePath,
+      "utf8"
+    );
+
+    const resourceRegex =
+      /resource\s+"([^"]+)"\s+"([^"]+)"\s*\{/g;
+
+    let match;
+
+    while (
+      (match = resourceRegex.exec(content)) !== null
+    ) {
+      resources.push({
+        type: match[1],
+        name: match[2],
+        file: file.name,
+      });
+    }
+  }
+
+  return {
+    project: projectName,
+    path: projectPath,
+    total: resources.length,
+    resources,
+  };
+}
+
 module.exports = {
   getTerraformStatus,
   getTerraformProjects,
@@ -283,4 +333,5 @@ module.exports = {
   getTerraformProject,
   validateTerraformProjectConfig,
   runTerraformInit,
+  getTerraformResources,
 };

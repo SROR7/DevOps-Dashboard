@@ -6,12 +6,21 @@ const cors = require("cors");
 const githubApi = require("./github");
 
 const {
+  getAwsOverview,
+  getEc2Instances,
+  getS3Buckets,
+  getEksClusters,
+  getRdsDatabases,
+} = require("./aws");
+
+const {
   getTerraformStatus,
   getTerraformProjects,
   runTerraformPlan,
   getTerraformProject,
   validateTerraformProjectConfig,
   runTerraformInit,
+  getTerraformResources,
 } = require("./terraform");
 
 const app = express();
@@ -228,9 +237,13 @@ app.get("/api/aws/s3", async (req, res) => {
 app.get("/api/aws/rds", async (req, res) => {
   try {
     const databases = await getRdsDatabases();
+
     res.json(databases);
   } catch (error) {
-    console.error("Failed to fetch RDS databases:", error);
+    console.error(
+      "Failed to fetch RDS databases:",
+      error
+    );
 
     res.status(500).json({
       error: "Failed to fetch RDS databases",
@@ -304,7 +317,8 @@ app.post("/api/terraform/plan", async (req, res) => {
       });
     }
 
-    const result = await runTerraformPlan(project);
+    const result =
+      await runTerraformPlan(project);
 
     res.json(result);
   } catch (error) {
@@ -315,27 +329,6 @@ app.post("/api/terraform/plan", async (req, res) => {
 
     res.status(500).json({
       error: "Terraform plan failed",
-      message: error.message,
-    });
-  }
-});
-
-
-app.get("/api/terraform/projects/:project", (req, res) => {
-  try {
-    const project = getTerraformProject(
-      req.params.project
-    );
-
-    res.json(project);
-  } catch (error) {
-    console.error(
-      "Terraform Project API Error:",
-      error.message
-    );
-
-    res.status(500).json({
-      error: "Failed to fetch Terraform project",
       message: error.message,
     });
   }
@@ -403,8 +396,60 @@ app.post(
   }
 );
 
+app.get(
+  "/api/terraform/projects/:project/resources",
+  (req, res) => {
+    try {
+      const resources =
+        getTerraformResources(
+          req.params.project
+        );
+
+      res.json(resources);
+    } catch (error) {
+      console.error(
+        "Terraform Resources API Error:",
+        error.message
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to fetch Terraform resources",
+        message: error.message,
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/terraform/projects/:project",
+  (req, res) => {
+    try {
+      const project =
+        getTerraformProject(
+          req.params.project
+        );
+
+      res.json(project);
+    } catch (error) {
+      console.error(
+        "Terraform Project API Error:",
+        error.message
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to fetch Terraform project",
+        message: error.message,
+      });
+    }
+  }
+);
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
+  console.log(
+    `Backend running on port ${PORT}`
+  );
 });
