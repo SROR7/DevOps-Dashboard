@@ -104,7 +104,9 @@ function validateTerraformProject(projectName) {
   }
 
   if (!fs.statSync(projectPath).isDirectory()) {
-    throw new Error("Terraform project is not a directory");
+    throw new Error(
+      "Terraform project is not a directory"
+    );
   }
 
   const hasTerraformFile = fs
@@ -122,7 +124,10 @@ function validateTerraformProject(projectName) {
 
 function cleanTerraformOutput(output) {
   return output
-    .replace(/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g, "")
+    .replace(
+      /\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g,
+      ""
+    )
     .trim();
 }
 
@@ -168,9 +173,7 @@ function runTerraformCommand(
   });
 }
 
-async function runTerraformPlan(
-  projectName
-) {
+async function runTerraformPlan(projectName) {
   const terraformPath = await install(outputs);
 
   const projectPath =
@@ -197,6 +200,37 @@ async function runTerraformPlan(
     project: projectName,
     path: projectPath,
     output: planResult.stdout,
+  };
+}
+
+async function runTerraformApply(projectName) {
+  const terraformPath = await install(outputs);
+
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  await runTerraformCommand(
+    terraformPath,
+    ["init", "-input=false"],
+    projectPath
+  );
+
+  const applyResult =
+    await runTerraformCommand(
+      terraformPath,
+      [
+        "apply",
+        "-input=false",
+        "-auto-approve",
+        "-no-color",
+      ],
+      projectPath
+    );
+
+  return {
+    project: projectName,
+    path: projectPath,
+    output: applyResult.stdout,
   };
 }
 
@@ -232,7 +266,9 @@ function getTerraformProject(projectName) {
   };
 }
 
-async function validateTerraformProjectConfig(projectName) {
+async function validateTerraformProjectConfig(
+  projectName
+) {
   const terraformPath = await install(outputs);
 
   const projectPath =
@@ -240,15 +276,20 @@ async function validateTerraformProjectConfig(projectName) {
 
   await runTerraformCommand(
     terraformPath,
-    ["init", "-backend=false", "-input=false"],
+    [
+      "init",
+      "-backend=false",
+      "-input=false",
+    ],
     projectPath
   );
 
-  const result = await runTerraformCommand(
-    terraformPath,
-    ["validate", "-no-color"],
-    projectPath
-  );
+  const result =
+    await runTerraformCommand(
+      terraformPath,
+      ["validate", "-no-color"],
+      projectPath
+    );
 
   return {
     project: projectName,
@@ -263,11 +304,12 @@ async function runTerraformInit(projectName) {
   const projectPath =
     validateTerraformProject(projectName);
 
-  const result = await runTerraformCommand(
-    terraformPath,
-    ["init", "-input=false"],
-    projectPath
-  );
+  const result =
+    await runTerraformCommand(
+      terraformPath,
+      ["init", "-input=false"],
+      projectPath
+    );
 
   return {
     project: projectName,
@@ -333,11 +375,12 @@ async function getTerraformState(projectName) {
     validateTerraformProject(projectName);
 
   try {
-    const result = await runTerraformCommand(
-      terraformPath,
-      ["state", "list"],
-      projectPath
-    );
+    const result =
+      await runTerraformCommand(
+        terraformPath,
+        ["state", "list"],
+        projectPath
+      );
 
     const resources = result.stdout
       ? result.stdout
@@ -372,13 +415,85 @@ async function getTerraformState(projectName) {
   }
 }
 
+async function compareTerraformState(projectName) {
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  const configuration =
+    getTerraformResources(projectName);
+
+  const state =
+    await getTerraformState(projectName);
+
+  const configurationResources =
+    configuration.resources.map(
+      (resource) =>
+        `${resource.type}.${resource.name}`
+    );
+
+  const stateResources = state.resources;
+
+  const matched =
+    configurationResources.filter(
+      (resource) =>
+        stateResources.includes(resource)
+    );
+
+  const missingFromState =
+    configurationResources.filter(
+      (resource) =>
+        !stateResources.includes(resource)
+    );
+
+  const unmanagedResources =
+    stateResources.filter(
+      (resource) =>
+        !configurationResources.includes(resource)
+    );
+
+  return {
+    project: projectName,
+    path: projectPath,
+    hasState: state.hasState,
+
+    configuration: {
+      total: configurationResources.length,
+      resources: configurationResources,
+    },
+
+    state: {
+      total: stateResources.length,
+      resources: stateResources,
+    },
+
+    comparison: {
+      matched: {
+        total: matched.length,
+        resources: matched,
+      },
+
+      missingFromState: {
+        total: missingFromState.length,
+        resources: missingFromState,
+      },
+
+      unmanagedResources: {
+        total: unmanagedResources.length,
+        resources: unmanagedResources,
+      },
+    },
+  };
+}
+
 module.exports = {
   getTerraformStatus,
   getTerraformProjects,
   runTerraformPlan,
+  runTerraformApply,
   getTerraformProject,
   validateTerraformProjectConfig,
   runTerraformInit,
   getTerraformResources,
   getTerraformState,
+  compareTerraformState,
 };

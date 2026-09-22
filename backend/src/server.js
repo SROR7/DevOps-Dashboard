@@ -17,13 +17,14 @@ const {
   getTerraformStatus,
   getTerraformProjects,
   runTerraformPlan,
+  runTerraformApply,
   getTerraformProject,
   validateTerraformProjectConfig,
   runTerraformInit,
   getTerraformResources,
   getTerraformState,
+  compareTerraformState,
 } = require("./terraform");
-
 const app = express();
 
 app.use(cors());
@@ -423,6 +424,31 @@ app.get(
 );
 
 app.get(
+  "/api/terraform/projects/:project/compare",
+  async (req, res) => {
+    try {
+      const comparison =
+        await compareTerraformState(
+          req.params.project
+        );
+
+      res.json(comparison);
+    } catch (error) {
+      console.error(
+        "Terraform Drift Detection API Error:",
+        error.message
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to compare Terraform state",
+        message: error.message,
+      });
+    }
+  }
+);
+
+app.get(
   "/api/terraform/projects/:project",
   (req, res) => {
     try {
@@ -471,6 +497,33 @@ app.get(
     }
   }
 );
+
+app.post("/api/terraform/apply", async (req, res) => {
+  try {
+    const { project } = req.body;
+
+    if (!project) {
+      return res.status(400).json({
+        error: "Project name is required",
+      });
+    }
+
+    const result =
+      await runTerraformApply(project);
+
+    res.json(result);
+  } catch (error) {
+    console.error(
+      "Terraform Apply API Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: "Terraform apply failed",
+      message: error.message,
+    });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 
