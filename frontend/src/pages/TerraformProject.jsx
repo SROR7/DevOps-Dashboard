@@ -9,6 +9,147 @@ function TerraformProject() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [planLoading, setPlanLoading] = useState(false);
+  const [planOutput, setPlanOutput] = useState("");
+  const [planError, setPlanError] = useState("");
+
+  const [initLoading, setInitLoading] = useState(false);
+  const [initOutput, setInitOutput] = useState("");
+  const [initError, setInitError] = useState("");
+
+  const [validateLoading, setValidateLoading] =
+    useState(false);
+  const [validateOutput, setValidateOutput] =
+    useState("");
+  const [validateError, setValidateError] =
+    useState("");
+
+  const handleInit = async () => {
+    try {
+      setInitLoading(true);
+      setInitOutput("");
+      setInitError("");
+  
+      const response = await fetch(
+        "http://localhost:3000/api/terraform/init",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            project: projectName,
+          }),
+        }
+      );
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            result.error ||
+            "Terraform init failed"
+        );
+      }
+  
+      setInitOutput(result.output);
+    } catch (err) {
+      console.error(
+        "Terraform Init Error:",
+        err
+      );
+    
+        setInitError(err.message);
+      } finally {
+        setInitLoading(false);
+      }
+    };
+
+  const handleValidate = async () => {
+    try {
+      setValidateLoading(true);
+      setValidateOutput("");
+      setValidateError("");
+
+      const response = await fetch(
+        "http://localhost:3000/api/terraform/validate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            project: projectName,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            result.error ||
+            "Terraform validation failed"
+        );
+      }
+
+      setValidateOutput(result.output);
+    } catch (err) {
+      console.error(
+        "Terraform Validate Error:",
+        err
+      );
+
+      setValidateError(err.message);
+    } finally {
+      setValidateLoading(false);
+    }
+  };
+
+  const handlePlan = async () => {
+    try {
+      setPlanLoading(true);
+      setPlanOutput("");
+      setPlanError("");
+
+      const response = await fetch(
+        "http://localhost:3000/api/terraform/plan",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            project: projectName,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            result.error ||
+            "Terraform plan failed"
+        );
+      }
+
+      setPlanOutput(result.output);
+    } catch (err) {
+      console.error(
+        "Terraform Plan Error:",
+        err
+      );
+
+      setPlanError(err.message);
+    } finally {
+      setPlanLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchProject = async () => {
       try {
@@ -51,7 +192,9 @@ function TerraformProject() {
       <div className="page">
         <div className="terraform-empty-state">
           <h3>Loading project...</h3>
-          <p>Fetching Terraform project details.</p>
+          <p>
+            Fetching Terraform project details.
+          </p>
         </div>
       </div>
     );
@@ -62,6 +205,7 @@ function TerraformProject() {
       <div className="page">
         <div className="terraform-empty-state">
           <h3>Failed to load project</h3>
+
           <p>{error}</p>
 
           <button
@@ -77,7 +221,6 @@ function TerraformProject() {
 
   return (
     <div className="page">
-      {/* Header */}
       <div className="page-header">
         <div>
           <button
@@ -95,9 +238,7 @@ function TerraformProject() {
         </div>
       </div>
 
-      {/* Project information */}
       <div className="terraform-project-details-grid">
-
         <div className="terraform-detail-card">
           <span className="terraform-detail-label">
             Project
@@ -135,10 +276,8 @@ function TerraformProject() {
             {project.files.length}
           </strong>
         </div>
-
       </div>
 
-      {/* Project path */}
       <div className="terraform-project-info">
         <div>
           <span className="terraform-detail-label">
@@ -149,13 +288,14 @@ function TerraformProject() {
         </div>
       </div>
 
-      {/* Files */}
       <div className="terraform-project-files">
         <div className="terraform-section-header">
           <div>
             <h2>Project Files</h2>
+
             <p>
-              Files detected inside this Terraform project.
+              Files detected inside this Terraform
+              project.
             </p>
           </div>
         </div>
@@ -176,20 +316,166 @@ function TerraformProject() {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="terraform-project-actions">
-        <button className="terraform-project-button">
-          Init
+      <button
+        className="terraform-project-button"
+        onClick={handleInit}
+        disabled={initLoading}
+      >
+        {initLoading ? "Initializing..." : "Init"}
+      </button>
+
+        <button
+          className="terraform-project-button"
+          onClick={handleValidate}
+          disabled={validateLoading}
+        >
+          {validateLoading
+            ? "Validating..."
+            : "Validate"}
         </button>
 
-        <button className="terraform-project-button">
-          Validate
-        </button>
-
-        <button className="terraform-project-button primary">
-          Plan
+        <button
+          className="terraform-project-button primary"
+          onClick={handlePlan}
+          disabled={planLoading}
+        >
+          {planLoading
+            ? "Planning..."
+            : "Plan"}
         </button>
       </div>
+
+      {initError && (
+        <div className="terraform-empty-state">
+          <h3>Terraform Init Failed</h3>
+          <p>{initError}</p>
+        </div>
+      )}
+
+      {initOutput && (
+        <div className="terraform-plan-output">
+          <div className="terraform-plan-header">
+            <div className="terraform-plan-title-row">
+              <div className="terraform-plan-icon">
+                T
+              </div>
+
+              <div>
+                <h2>Terraform Init</h2>
+                <p>
+                  Terraform project initialization
+                </p>
+              </div>
+            </div>
+
+            <div className="terraform-plan-status">
+              <span className="terraform-status-dot"></span>
+              Completed
+            </div>
+          </div>
+
+          <div className="terraform-terminal">
+            <div className="terraform-terminal-header">
+              <div className="terraform-terminal-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <span className="terraform-terminal-title">
+                terraform init
+              </span>
+            </div>
+
+            <pre className="terraform-terminal-output">
+              {initOutput}
+            </pre>
+          </div>
+        </div>
+      )}
+
+      {validateError && (
+        <div className="terraform-empty-state">
+          <h3>Terraform Validation Failed</h3>
+
+          <p>{validateError}</p>
+        </div>
+      )}
+
+      {validateOutput && (
+        <div className="terraform-validation-result">
+          <div className="terraform-validation-header">
+            <div>
+              <h2>Terraform Validation</h2>
+
+              <p>
+                Configuration validation result
+              </p>
+            </div>
+
+            <div className="terraform-plan-status">
+              <span className="terraform-status-dot"></span>
+              Valid
+            </div>
+          </div>
+
+          <pre className="terraform-validation-output">
+            {validateOutput}
+          </pre>
+        </div>
+      )}
+
+      {planError && (
+        <div className="terraform-empty-state">
+          <h3>Terraform Plan Failed</h3>
+
+          <p>{planError}</p>
+        </div>
+      )}
+
+      {planOutput && (
+        <div className="terraform-plan-output">
+          <div className="terraform-plan-header">
+            <div className="terraform-plan-title-row">
+              <div className="terraform-plan-icon">
+                T
+              </div>
+
+              <div>
+                <h2>Terraform Plan</h2>
+
+                <p>
+                  Infrastructure execution plan
+                </p>
+              </div>
+            </div>
+
+            <div className="terraform-plan-status">
+              <span className="terraform-status-dot"></span>
+              Completed
+            </div>
+          </div>
+
+          <div className="terraform-terminal">
+            <div className="terraform-terminal-header">
+              <div className="terraform-terminal-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <span className="terraform-terminal-title">
+                terraform plan
+              </span>
+            </div>
+
+            <pre className="terraform-terminal-output">
+              {planOutput}
+            </pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

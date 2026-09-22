@@ -6,18 +6,12 @@ const cors = require("cors");
 const githubApi = require("./github");
 
 const {
-  getAwsOverview,
-  getEc2Instances,
-  getS3Buckets,
-  getEksClusters,
-  getRdsDatabases,
-} = require("./aws");
-
-const {
   getTerraformStatus,
   getTerraformProjects,
   runTerraformPlan,
   getTerraformProject,
+  validateTerraformProjectConfig,
+  runTerraformInit,
 } = require("./terraform");
 
 const app = express();
@@ -346,6 +340,69 @@ app.get("/api/terraform/projects/:project", (req, res) => {
     });
   }
 });
+
+app.post(
+  "/api/terraform/validate",
+  async (req, res) => {
+    try {
+      const { project } = req.body;
+
+      if (!project) {
+        return res.status(400).json({
+          error: "Project name is required",
+        });
+      }
+
+      const result =
+        await validateTerraformProjectConfig(
+          project
+        );
+
+      res.json(result);
+    } catch (error) {
+      console.error(
+        "Terraform Validate API Error:",
+        error.message
+      );
+
+      res.status(500).json({
+        error: "Terraform validation failed",
+        message: error.message,
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/terraform/init",
+  async (req, res) => {
+    try {
+      const { project } = req.body;
+
+      if (!project) {
+        return res.status(400).json({
+          error: "Project name is required",
+        });
+      }
+
+      const result =
+        await runTerraformInit(project);
+
+      res.json(result);
+    } catch (error) {
+      console.error(
+        "Terraform Init API Error:",
+        error.message
+      );
+
+      res.status(500).json({
+        error: "Terraform init failed",
+        message: error.message,
+      });
+    }
+  }
+);
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

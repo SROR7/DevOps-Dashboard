@@ -120,6 +120,12 @@ function validateTerraformProject(projectName) {
   return projectPath;
 }
 
+function cleanTerraformOutput(output) {
+  return output
+    .replace(/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g, "")
+    .trim();
+}
+
 function runTerraformCommand(
   terraformPath,
   args,
@@ -134,9 +140,17 @@ function runTerraformCommand(
         maxBuffer: 10 * 1024 * 1024,
       },
       (error, stdout, stderr) => {
+        const cleanStdout =
+          cleanTerraformOutput(stdout);
+
+        const cleanStderr =
+          cleanTerraformOutput(stderr);
+
         if (error) {
           const output =
-            stdout || stderr || error.message;
+            cleanStdout ||
+            cleanStderr ||
+            error.message;
 
           reject(
             new Error(output.trim())
@@ -146,8 +160,8 @@ function runTerraformCommand(
         }
 
         resolve({
-          stdout: stdout.trim(),
-          stderr: stderr.trim(),
+          stdout: cleanStdout,
+          stderr: cleanStderr,
         });
       }
     );
@@ -218,9 +232,55 @@ function getTerraformProject(projectName) {
   };
 }
 
+async function validateTerraformProjectConfig(projectName) {
+  const terraformPath = await install(outputs);
+
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  await runTerraformCommand(
+    terraformPath,
+    ["init", "-backend=false", "-input=false"],
+    projectPath
+  );
+
+  const result = await runTerraformCommand(
+    terraformPath,
+    ["validate", "-no-color"],
+    projectPath
+  );
+
+  return {
+    project: projectName,
+    path: projectPath,
+    output: result.stdout,
+  };
+}
+
+async function runTerraformInit(projectName) {
+  const terraformPath = await install(outputs);
+
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  const result = await runTerraformCommand(
+    terraformPath,
+    ["init", "-input=false"],
+    projectPath
+  );
+
+  return {
+    project: projectName,
+    path: projectPath,
+    output: result.stdout,
+  };
+}
+
 module.exports = {
   getTerraformStatus,
   getTerraformProjects,
   runTerraformPlan,
   getTerraformProject,
+  validateTerraformProjectConfig,
+  runTerraformInit,
 };
