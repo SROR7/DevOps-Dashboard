@@ -57,3 +57,5 @@ kubeconfig
 *.pem
 *.key
 secrets/
+
+.env

@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+
+      dockerfile: Dockerfile
+
+    env_file:
+      - ./backend/src/.env
+
+    container_name: devops-db-backend
+
+    ports:
+      - "3000:3000"
+
+
+    restart: unless-stopped
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    container_name: devops-db-frontend
+
+    ports:
+      - "5173:5173"
+
+    volumes:
+      - ~/.aws:/root/.aws:ro
+    environment:
+      AWS_REGION: eu-north-1
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped

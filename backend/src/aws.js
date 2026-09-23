@@ -24,8 +24,7 @@ const {
   DescribeDBInstancesCommand,
 } = require("@aws-sdk/client-rds");
 
-const region =
-  process.env.AWS_REGION || "eu-north-1";
+const region = process.env.AWS_REGION || "eu-north-1";
 
 const sts = new STSClient({ region });
 const ec2 = new EC2Client({ region });
@@ -33,43 +32,89 @@ const s3 = new S3Client({ region });
 const eks = new EKSClient({ region });
 const rds = new RDSClient({ region });
 
+function getErrorMessage(error) {
+  return (
+    error?.message ||
+    error?.name ||
+    "Unknown AWS error"
+  );
+}
+
 async function getAwsOverview() {
-  const [
-    identity,
-    instances,
-    buckets,
-    clusters,
-    databases,
-  ] = await Promise.all([
-    sts.send(
-      new GetCallerIdentityCommand({})
-    ),
-
-    ec2.send(
-      new DescribeInstancesCommand({})
-    ),
-
-    s3.send(
-      new ListBucketsCommand({})
-    ),
-
-    eks.send(
-      new ListClustersCommand({})
-    ),
-
-    rds.send(
-      new DescribeDBInstancesCommand({})
-    ),
+  const results = await Promise.allSettled([
+    sts.send(new GetCallerIdentityCommand({})),
+    ec2.send(new DescribeInstancesCommand({})),
+    s3.send(new ListBucketsCommand({})),
+    eks.send(new ListClustersCommand({})),
+    rds.send(new DescribeDBInstancesCommand({})),
   ]);
 
-  const ec2Instances =
-    instances.Reservations?.flatMap(
-      (reservation) =>
-        reservation.Instances || []
-    ) || [];
+  const [
+    identityResult,
+    instancesResult,
+    bucketsResult,
+    clustersResult,
+    databasesResult,
+  ] = results;
+
+  const accountId =
+    identityResult.status === "fulfilled"
+      ? identityResult.value.Account
+      : null;
+
+  let ec2Instances = [];
+  let ec2Error = null;
+
+  if (instancesResult.status === "fulfilled") {
+    ec2Instances =
+      instancesResult.value.Reservations?.flatMap(
+        (reservation) =>
+          reservation.Instances || []
+      ) || [];
+  } else {
+    ec2Error = getErrorMessage(
+      instancesResult.reason
+    );
+  }
+
+  let buckets = [];
+  let s3Error = null;
+
+  if (bucketsResult.status === "fulfilled") {
+    buckets =
+      bucketsResult.value.Buckets || [];
+  } else {
+    s3Error = getErrorMessage(
+      bucketsResult.reason
+    );
+  }
+
+  let clusterNames = [];
+  let eksError = null;
+
+  if (clustersResult.status === "fulfilled") {
+    clusterNames =
+      clustersResult.value.clusters || [];
+  } else {
+    eksError = getErrorMessage(
+      clustersResult.reason
+    );
+  }
+
+  let databases = [];
+  let rdsError = null;
+
+  if (databasesResult.status === "fulfilled") {
+    databases =
+      databasesResult.value.DBInstances || [];
+  } else {
+    rdsError = getErrorMessage(
+      databasesResult.reason
+    );
+  }
 
   return {
-    accountId: identity.Account,
+    accountId,
     region,
 
     ec2: {
@@ -84,24 +129,24 @@ async function getAwsOverview() {
         (instance) =>
           instance.State?.Name === "stopped"
       ).length,
+
+      error: ec2Error,
     },
 
     s3: {
-      total:
-        buckets.Buckets?.length || 0,
+      total: buckets.length,
+      error: s3Error,
     },
 
     eks: {
-      total:
-        clusters.clusters?.length || 0,
-
-      clusters:
-        clusters.clusters || [],
+      total: clusterNames.length,
+      clusters: clusterNames,
+      error: eksError,
     },
 
     rds: {
-      total:
-        databases.DBInstances?.length || 0,
+      total: databases.length,
+      error: rdsError,
     },
   };
 }
@@ -124,24 +169,16 @@ async function getEc2Instances() {
       );
 
     return {
-      id: instance.InstanceId,
-      name:
-        nameTag?.Value || "Unnamed",
-      state:
-        instance.State?.Name || "unknown",
-      type:
-        instance.InstanceType || "unknown",
-      privateIp:
-        instance.PrivateIpAddress || "-",
-      publicIp:
-        instance.PublicIpAddress || "-",
+      id: instance.InstanceId || "-",
+      name: nameTag?.Value || "Unnamed",
+      state: instance.State?.Name || "unknown",
+      type: instance.InstanceType || "unknown",
+      privateIp: instance.PrivateIpAddress || "-",
+      publicIp: instance.PublicIpAddress || "-",
       availabilityZone:
-        instance.Placement
-          ?.AvailabilityZone || "-",
-      ami:
-        instance.ImageId || "-",
-      launchTime:
-        instance.LaunchTime || null,
+        instance.Placement?.AvailabilityZone || "-",
+      ami: instance.ImageId || "-",
+      launchTime: instance.LaunchTime || null,
     };
   });
 }
@@ -154,9 +191,8 @@ async function getS3Buckets() {
   return (
     response.Buckets?.map(
       (bucket) => ({
-        name: bucket.Name,
-        creationDate:
-          bucket.CreationDate || null,
+        name: bucket.Name || "-",
+        creationDate: bucket.CreationDate || null,
       })
     ) || []
   );
@@ -170,45 +206,47 @@ async function getEksClusters() {
   const clusterNames =
     response.clusters || [];
 
-  const clusters =
-    await Promise.all(
-      clusterNames.map(
-        async (name) => {
-          const result =
-            await eks.send(
-              new DescribeClusterCommand({
-                name,
-              })
-            );
+  if (clusterNames.length === 0) {
+    return [];
+  }
 
-          const cluster =
-            result.cluster;
+  const clusters = await Promise.all(
+    clusterNames.map(async (name) => {
+      try {
+        const result =
+          await eks.send(
+            new DescribeClusterCommand({
+              name,
+            })
+          );
 
-          return {
-            name:
-              cluster.name || name,
+        const cluster =
+          result.cluster || {};
 
-            status:
-              cluster.status || "unknown",
-
-            version:
-              cluster.version || "-",
-
-            platformVersion:
-              cluster.platformVersion || "-",
-
-            endpoint:
-              cluster.endpoint || "-",
-
-            createdAt:
-              cluster.createdAt || null,
-
-            arn:
-              cluster.arn || "-",
-          };
-        }
-      )
-    );
+        return {
+          name: cluster.name || name,
+          status: cluster.status || "unknown",
+          version: cluster.version || "-",
+          platformVersion:
+            cluster.platformVersion || "-",
+          endpoint: cluster.endpoint || "-",
+          createdAt: cluster.createdAt || null,
+          arn: cluster.arn || "-",
+        };
+      } catch (error) {
+        return {
+          name,
+          status: "error",
+          version: "-",
+          platformVersion: "-",
+          endpoint: "-",
+          createdAt: null,
+          arn: "-",
+          error: getErrorMessage(error),
+        };
+      }
+    })
+  );
 
   return clusters;
 }
@@ -223,25 +261,17 @@ async function getRdsDatabases() {
       (database) => ({
         id:
           database.DBInstanceIdentifier || "-",
-
         status:
           database.DBInstanceStatus || "unknown",
-
-        engine:
-          database.Engine || "-",
-
+        engine: database.Engine || "-",
         instanceClass:
           database.DBInstanceClass || "-",
-
         endpoint:
           database.Endpoint?.Address || "-",
-
         port:
           database.Endpoint?.Port || "-",
-
         availabilityZone:
           database.AvailabilityZone || "-",
-
         engineVersion:
           database.EngineVersion || "-",
       })
