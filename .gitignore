@@ -59,3 +59,7 @@ kubeconfig
 secrets/
 
 .env
+
+terraform.tfvars
+*.tfvars
+*.tfvars.json
