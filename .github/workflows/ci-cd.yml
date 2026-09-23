@@ -40,19 +40,19 @@ jobs:
       - name: Build Frontend Image
         run: |
           docker build \
-            -t "$DOCKER_USERNAME/devops-db-frontend:latest" \
+            -t "sror/devops-db-frontend:latest" \
             ./frontend
 
       - name: Push Frontend Image
         run: |
-          docker push "$DOCKER_USERNAME/devops-db-frontend:latest"
+          docker push "sror/devops-db-frontend:latest"
 
       - name: Build Backend Image
         run: |
           docker build \
-            -t "$DOCKER_USERNAME/devops-db-backend:latest" \
+            -t "sror/devops-db-backend:latest" \
             ./backend
 
       - name: Push Backend Image
         run: |
-          docker push "$DOCKER_USERNAME/devops-db-backend:latest"
+          docker push "sror/devops-db-backend:latest"
