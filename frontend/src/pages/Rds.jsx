@@ -11,7 +11,7 @@ function Rds() {
     const fetchDatabases = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/aws/rds"
+          "http://api/aws/rds"
         );
 
         if (!response.ok) {

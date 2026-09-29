@@ -11,7 +11,7 @@ function S3() {
     const fetchBuckets = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/aws/s3"
+          "http://api/aws/s3"
         );
 
         if (!response.ok) {

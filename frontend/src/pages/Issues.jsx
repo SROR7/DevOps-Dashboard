@@ -17,7 +17,7 @@ function Issues() {
         setError("");
 
         const response = await fetch(
-          "http://localhost:3000/api/github/repos"
+          "http://api/github/repos"
         );
 
         if (!response.ok) {
