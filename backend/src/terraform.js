@@ -485,12 +485,72 @@ async function compareTerraformState(projectName) {
   };
 }
 
+function getTerraformFile(projectName, fileName) {
+  const projectPath =
+    validateTerraformProject(projectName);
+
+  if (!fileName) {
+    throw new Error("File name is required");
+  }
+
+  const requestedFile = path.resolve(
+    projectPath,
+    fileName
+  );
+
+  const relativePath = path.relative(
+    projectPath,
+    requestedFile
+  );
+
+  if (
+    relativePath.startsWith("..") ||
+    path.isAbsolute(relativePath)
+  ) {
+    throw new Error("Invalid Terraform file");
+  }
+
+  if (!fs.existsSync(requestedFile)) {
+    throw new Error("Terraform file not found");
+  }
+
+  if (!fs.statSync(requestedFile).isFile()) {
+    throw new Error("Requested path is not a file");
+  }
+
+  const allowedExtensions = [
+    ".tf",
+    ".tfvars",
+    ".json",
+  ];
+
+  const extension = path.extname(requestedFile);
+
+  if (!allowedExtensions.includes(extension)) {
+    throw new Error(
+      "Only Terraform configuration files are allowed"
+    );
+  }
+
+  const content = fs.readFileSync(
+    requestedFile,
+    "utf8"
+  );
+
+  return {
+    project: projectName,
+    file: relativePath,
+    content,
+  };
+}
+
 module.exports = {
   getTerraformStatus,
   getTerraformProjects,
   runTerraformPlan,
   runTerraformApply,
   getTerraformProject,
+  getTerraformFile,
   validateTerraformProjectConfig,
   runTerraformInit,
   getTerraformResources,

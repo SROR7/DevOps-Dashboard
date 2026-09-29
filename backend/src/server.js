@@ -19,12 +19,14 @@ const {
   runTerraformPlan,
   runTerraformApply,
   getTerraformProject,
+  getTerraformFile,
   validateTerraformProjectConfig,
   runTerraformInit,
   getTerraformResources,
   getTerraformState,
   compareTerraformState,
 } = require("./terraform");
+
 const app = express();
 
 app.use(cors());
@@ -402,10 +404,9 @@ app.get(
   "/api/terraform/projects/:project/resources",
   (req, res) => {
     try {
-      const resources =
-        getTerraformResources(
-          req.params.project
-        );
+      const resources = getTerraformResources(
+        req.params.project
+      );
 
       res.json(resources);
     } catch (error) {
@@ -448,31 +449,40 @@ app.get(
   }
 );
 
+/*
+ * Terraform file
+ * IMPORTANT:
+ * This route must come BEFORE /:project
+ */
 app.get(
-  "/api/terraform/projects/:project",
+  "/api/terraform/projects/:project/files/:file",
   (req, res) => {
     try {
-      const project =
-        getTerraformProject(
-          req.params.project
-        );
+      const file = getTerraformFile(
+        req.params.project,
+        req.params.file
+      );
 
-      res.json(project);
+      res.json(file);
     } catch (error) {
       console.error(
-        "Terraform Project API Error:",
+        "Terraform File API Error:",
         error.message
       );
 
       res.status(500).json({
         error:
-          "Failed to fetch Terraform project",
+          "Failed to fetch Terraform file",
         message: error.message,
       });
     }
   }
 );
 
+/*
+ * Terraform state
+ * This also must come BEFORE /:project
+ */
 app.get(
   "/api/terraform/projects/:project/state",
   async (req, res) => {
@@ -492,6 +502,35 @@ app.get(
       res.status(500).json({
         error:
           "Failed to fetch Terraform state",
+        message: error.message,
+      });
+    }
+  }
+);
+
+/*
+ * Generic project route
+ * KEEP THIS LAST
+ */
+app.get(
+  "/api/terraform/projects/:project",
+  (req, res) => {
+    try {
+      const project =
+        getTerraformProject(
+          req.params.project
+        );
+
+      res.json(project);
+    } catch (error) {
+      console.error(
+        "Terraform Project API Error:",
+        error.message
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to fetch Terraform project",
         message: error.message,
       });
     }
@@ -524,6 +563,8 @@ app.post("/api/terraform/apply", async (req, res) => {
     });
   }
 });
+
+
 
 const PORT = process.env.PORT || 3000;
 

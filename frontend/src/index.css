@@ -3116,3 +3116,600 @@ tbody tr:hover {
 .terraform-project-page {
   margin: 10px;
 }
+
+
+/* =========================================
+   Terraform Page
+   ========================================= */
+
+   .terraform-section {
+    margin-top: 24px;
+  }
+  
+  .terraform-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .terraform-section-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .terraform-section-description {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+  
+  
+  /* =========================================
+     Project Browser
+     ========================================= */
+  
+  .terraform-browser {
+    width: 100%;
+    overflow: hidden;
+  
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  
+  .terraform-browser-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    gap: 20px;
+    padding: 20px;
+  
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .terraform-browser-title {
+    margin: 0;
+  
+    font-size: 16px;
+    font-weight: 600;
+  
+    color: var(--text);
+  }
+  
+  .terraform-browser-description {
+    margin: 6px 0 0;
+  
+    font-size: 13px;
+    line-height: 1.5;
+  
+    color: var(--text-muted);
+  }
+  
+  
+  /* =========================================
+     Browse Button
+     ========================================= */
+  
+  .terraform-browse-button,
+  .terraform-browse-empty-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    gap: 8px;
+  
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  
+    background: var(--panel-2);
+    color: var(--text);
+  
+    padding: 9px 14px;
+  
+    font-size: 13px;
+    font-weight: 500;
+  
+    cursor: pointer;
+  
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+  
+  .terraform-browse-button:hover,
+  .terraform-browse-empty-button:hover {
+    background: var(--panel-hover);
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+  
+  .terraform-browse-button:active,
+  .terraform-browse-empty-button:active {
+    transform: translateY(1px);
+  }
+  
+  
+  /* =========================================
+     Empty Browser
+     ========================================= */
+  
+  .terraform-browser-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  
+    min-height: 260px;
+  
+    padding: 40px 20px;
+  
+    text-align: center;
+  
+    color: var(--text-muted);
+  }
+  
+  .terraform-browser-empty svg {
+    margin-bottom: 14px;
+    opacity: 0.6;
+  }
+  
+  .terraform-browser-empty h4 {
+    margin: 0;
+  
+    font-size: 15px;
+    font-weight: 600;
+  
+    color: var(--text);
+  }
+  
+  .terraform-browser-empty p {
+    max-width: 420px;
+  
+    margin: 8px 0 20px;
+  
+    font-size: 13px;
+    line-height: 1.6;
+  
+    color: var(--text-muted);
+  }
+  
+  
+  /* =========================================
+     Selected Project
+     ========================================= */
+  
+  .terraform-local-project {
+    padding: 20px;
+  }
+  
+  .terraform-local-project-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    gap: 20px;
+  
+    margin-bottom: 16px;
+  }
+  
+  .terraform-local-project-label {
+    display: block;
+  
+    margin-bottom: 5px;
+  
+    font-size: 11px;
+    font-weight: 500;
+  
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  
+    color: var(--text-muted);
+  }
+  
+  .terraform-local-project-header h4 {
+    margin: 0;
+  
+    font-size: 15px;
+    font-weight: 600;
+  
+    color: var(--text);
+  }
+  
+  .terraform-file-count {
+    padding: 5px 9px;
+  
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  
+    background: var(--panel-2);
+  
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  
+  
+  /* =========================================
+     Terraform Files
+     ========================================= */
+  
+  .terraform-local-files {
+    display: grid;
+  
+    grid-template-columns:
+      repeat(auto-fill, minmax(220px, 1fr));
+  
+    gap: 8px;
+  }
+  
+  .terraform-local-file {
+    display: flex;
+    align-items: center;
+  
+    gap: 10px;
+  
+    width: 100%;
+  
+    padding: 11px 12px;
+  
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  
+    background: var(--panel-2);
+  
+    color: var(--text-muted);
+  
+    text-align: left;
+  
+    cursor: pointer;
+  
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+  
+  .terraform-local-file:hover {
+    background: var(--panel-hover);
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  
+  .terraform-local-file.active {
+    background: var(--panel-hover);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: var(--text);
+  }
+  
+  .terraform-local-file svg {
+    flex-shrink: 0;
+  }
+  
+  .terraform-local-file span {
+    overflow: hidden;
+  
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  
+    font-size: 13px;
+  }
+  
+  
+  /* =========================================
+     Code Viewer
+     ========================================= */
+  
+  .terraform-code-viewer {
+    overflow: hidden;
+  
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  
+    background: #0b0c11;
+  }
+  
+  .terraform-code-viewer-header {
+    display: flex;
+    align-items: center;
+  
+    min-height: 46px;
+  
+    padding: 0 16px;
+  
+    border-bottom: 1px solid var(--border);
+  
+    background: var(--panel-2);
+  }
+  
+  .terraform-code-file {
+    display: flex;
+    align-items: center;
+  
+    gap: 8px;
+  
+    font-size: 13px;
+    font-weight: 500;
+  
+    color: var(--text);
+  }
+  
+  .terraform-code {
+    margin: 0;
+  
+    padding: 22px;
+  
+    max-height: 600px;
+  
+    overflow: auto;
+  
+    font-family:
+      "JetBrains Mono",
+      "Fira Code",
+      "Cascadia Code",
+      monospace;
+  
+    font-size: 13px;
+    line-height: 1.7;
+  
+    color: #d7d9e0;
+  
+    tab-size: 2;
+  
+    white-space: pre;
+  
+    scrollbar-width: thin;
+  }
+  
+  
+  /* =========================================
+     Terraform Actions
+     ========================================= */
+  
+  .terraform-project-actions {
+    display: flex;
+    align-items: center;
+  
+    gap: 10px;
+  
+    margin-top: 16px;
+  }
+  
+  .terraform-project-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    gap: 8px;
+  
+    padding: 9px 14px;
+  
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  
+    background: var(--panel-2);
+  
+    color: var(--text);
+  
+    font-size: 13px;
+    font-weight: 500;
+  
+    cursor: pointer;
+  
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      opacity 0.2s ease;
+  }
+  
+  .terraform-project-button:hover:not(:disabled) {
+    background: var(--panel-hover);
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+  
+  .terraform-project-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  
+  /* =========================================
+     Error
+     ========================================= */
+  
+  .terraform-selector-error {
+    display: flex;
+    align-items: center;
+  
+    gap: 8px;
+  
+    margin-top: 14px;
+    padding: 10px 12px;
+  
+    border: 1px solid rgba(255, 80, 80, 0.15);
+    border-radius: 8px;
+  
+    background: rgba(255, 80, 80, 0.06);
+  
+    color: #ff8c8c;
+  
+    font-size: 13px;
+  }
+  
+  
+  /* =========================================
+     Terraform Plan Output
+     ========================================= */
+  
+  .terraform-plan-output {
+    margin-top: 18px;
+  
+    overflow: hidden;
+  
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  
+    background: #0b0c11;
+  }
+  
+  .terraform-plan-header {
+    padding: 14px 16px;
+  
+    border-bottom: 1px solid var(--border);
+  
+    background: var(--panel-2);
+  }
+  
+  .terraform-plan-title-row {
+    display: flex;
+    align-items: center;
+  
+    gap: 8px;
+  }
+  
+  .terraform-plan-title {
+    font-size: 13px;
+    font-weight: 600;
+  
+    color: var(--text);
+  }
+  
+  
+  /* =========================================
+     Terminal
+     ========================================= */
+  
+  .terraform-terminal {
+    overflow: hidden;
+  }
+  
+  .terraform-terminal-header {
+    display: flex;
+    align-items: center;
+  
+    height: 36px;
+  
+    padding: 0 14px;
+  
+    border-bottom: 1px solid var(--border);
+  
+    background: #0e1016;
+  }
+  
+  .terraform-terminal-dots {
+    display: flex;
+  
+    gap: 6px;
+  
+    margin-right: 12px;
+  }
+  
+  .terraform-terminal-dots span {
+    width: 7px;
+    height: 7px;
+  
+    border-radius: 50%;
+  
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .terraform-terminal-title {
+    font-family: monospace;
+  
+    font-size: 11px;
+  
+    color: var(--text-muted);
+  }
+  
+  .terraform-terminal-output {
+    margin: 0;
+  
+    padding: 18px;
+  
+    max-height: 450px;
+  
+    overflow: auto;
+  
+    font-family:
+      "JetBrains Mono",
+      "Fira Code",
+      "Cascadia Code",
+      monospace;
+  
+    font-size: 12px;
+    line-height: 1.7;
+  
+    color: #cfd2da;
+  
+    white-space: pre-wrap;
+  
+    scrollbar-width: thin;
+  }
+  
+  
+  /* =========================================
+     Scrollbars
+     ========================================= */
+  
+  .terraform-code::-webkit-scrollbar,
+  .terraform-terminal-output::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+  
+  .terraform-code::-webkit-scrollbar-track,
+  .terraform-terminal-output::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .terraform-code::-webkit-scrollbar-thumb,
+  .terraform-terminal-output::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+  }
+  
+  .terraform-code::-webkit-scrollbar-thumb:hover,
+  .terraform-terminal-output::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  
+  /* =========================================
+     Responsive
+     ========================================= */
+  
+  @media (max-width: 900px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .terraform-local-files {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .terraform-browser-header,
+    .terraform-section-header,
+    .terraform-local-project-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  
+    .terraform-browse-button {
+      width: 100%;
+    }
+  
+    .terraform-code {
+      font-size: 12px;
+      padding: 16px;
+    }
+  }
