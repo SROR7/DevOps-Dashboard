@@ -47,3 +47,8 @@ kubeconfig
 secrets/
 
 .env
+
+node_modules
+dist
+.vite
+node_modules/.vite
