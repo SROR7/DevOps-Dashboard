@@ -49,7 +49,7 @@ function PullRequests() {
         setError("");
 
         const response = await fetch(
-          `http://localhost:3000/api/github/pulls?repo=${encodeURIComponent(
+          `http://api/github/pulls?repo=${encodeURIComponent(
             selectedRepo
           )}`
         );

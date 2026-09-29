@@ -54,7 +54,7 @@ function Issues() {
         setError("");
 
         const response = await fetch(
-          `http://localhost:3000/api/github/issues?repo=${encodeURIComponent(
+          `http://api/github/issues?repo=${encodeURIComponent(
             selectedRepo
           )}`
         );
