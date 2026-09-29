@@ -11,7 +11,7 @@ function Eks() {
     const fetchClusters = async () => {
       try {
         const response = await fetch(
-          "http://api/aws/eks"
+          "/api/aws/eks"
         );
 
         if (!response.ok) {

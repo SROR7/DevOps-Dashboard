@@ -14,7 +14,7 @@ function Aws() {
     const fetchAwsOverview = async () => {
       try {
         const response = await fetch(
-          "http://api/aws/overview"
+          "/api/aws/overview"
         );
 
         if (!response.ok) {

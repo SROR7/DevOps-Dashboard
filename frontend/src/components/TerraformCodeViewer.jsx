@@ -22,7 +22,7 @@ function TerraformCodeViewer({
         setContent("");
 
         const response = await fetch(
-          `http://api/terraform/projects/${encodeURIComponent(
+          `/api/terraform/projects/${encodeURIComponent(
             project
           )}/files/${encodeURIComponent(file)}`
         );

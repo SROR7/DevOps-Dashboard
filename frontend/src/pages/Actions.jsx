@@ -13,7 +13,7 @@ function Actions() {
     const fetchRepositories = async () => {
       try {
         const response = await fetch(
-          "http://api/github/repos"
+          "/api/github/repos"
         );
 
         if (!response.ok) {
@@ -49,7 +49,7 @@ function Actions() {
         setError("");
 
         const response = await fetch(
-          `http:/api/github/actions?repo=${encodeURIComponent(
+          `/api/github/actions?repo=${encodeURIComponent(
             selectedRepo
           )}`
         );

@@ -9,7 +9,7 @@ function Github() {
     const fetchRepositories = async () => {
       try {
         const response = await fetch(
-          "http://api/github/repos"
+          "/api/github/repos"
         );
 
         if (!response.ok) {

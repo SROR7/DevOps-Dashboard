@@ -17,7 +17,7 @@ function Issues() {
         setError("");
 
         const response = await fetch(
-          "http://api/github/repos"
+          "/api/github/repos"
         );
 
         if (!response.ok) {
@@ -54,7 +54,7 @@ function Issues() {
         setError("");
 
         const response = await fetch(
-          `http://api/github/issues?repo=${encodeURIComponent(
+          `/api/github/issues?repo=${encodeURIComponent(
             selectedRepo
           )}`
         );

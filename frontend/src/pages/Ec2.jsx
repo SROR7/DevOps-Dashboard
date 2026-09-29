@@ -11,7 +11,7 @@ function Ec2() {
     const fetchInstances = async () => {
       try {
         const response = await fetch(
-          "http://api/aws/ec2"
+          "/api/aws/ec2"
         );
 
         if (!response.ok) {

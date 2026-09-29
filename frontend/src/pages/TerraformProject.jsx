@@ -62,7 +62,7 @@ function TerraformProject() {
       setStateError("");
 
       const response = await fetch(
-        `http://api/terraform/projects/${encodeURIComponent(
+        `/api/terraform/projects/${encodeURIComponent(
           projectName
         )}/state`
       );
@@ -96,7 +96,7 @@ function TerraformProject() {
       setComparisonError("");
 
       const response = await fetch(
-        `http://api/terraform/projects/${encodeURIComponent(
+        `/api/terraform/projects/${encodeURIComponent(
           projectName
         )}/compare`
       );
@@ -137,7 +137,7 @@ function TerraformProject() {
       setInitError("");
 
       const response = await fetch(
-        "http://api/terraform/init",
+        "/api/terraform/init",
         {
           method: "POST",
           headers: {
@@ -181,7 +181,7 @@ function TerraformProject() {
       setValidateError("");
 
       const response = await fetch(
-        "http://api/terraform/validate",
+        "/api/terraform/validate",
         {
           method: "POST",
           headers: {
@@ -223,7 +223,7 @@ function TerraformProject() {
       setPlanError("");
 
       const response = await fetch(
-        "http://api/terraform/plan",
+        "/api/terraform/plan",
         {
           method: "POST",
           headers: {
@@ -275,7 +275,7 @@ function TerraformProject() {
       setApplyError("");
 
       const response = await fetch(
-        "http://api/terraform/apply",
+        "/api/terraform/apply",
         {
           method: "POST",
           headers: {
@@ -319,7 +319,7 @@ function TerraformProject() {
         setError("");
 
         const response = await fetch(
-          `http://api/terraform/projects/${encodeURIComponent(
+          `/api/terraform/projects/${encodeURIComponent(
             projectName
           )}`
         );
@@ -356,7 +356,7 @@ function TerraformProject() {
         setResourcesError("");
 
         const response = await fetch(
-          `http://api/terraform/projects/${encodeURIComponent(
+          `/api/terraform/projects/${encodeURIComponent(
             projectName
           )}/resources`
         );
