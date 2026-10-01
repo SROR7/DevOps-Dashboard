@@ -24,7 +24,7 @@ const {
   DescribeDBInstancesCommand,
 } = require("@aws-sdk/client-rds");
 
-const region = process.env.AWS_REGION || "eu-north-1";
+const region = process.env.AWS_REGION || "us-east-1";
 
 const sts = new STSClient({ region });
 const ec2 = new EC2Client({ region });
