@@ -12,7 +12,7 @@ export default defineConfig({
 
     hmr: {
       protocol: 'ws',
-      host: 'k8s-dodashbo-dodashbo-fe6bf9bf0e-1830682628.eu-north-1.elb.amazonaws.com',
+      host: 'k8s-dashboar-dashboar-d3ed1467af-640568485.us-east-1.elb.amazonaws.com/',
       clientPort: 80,
     },
   },
