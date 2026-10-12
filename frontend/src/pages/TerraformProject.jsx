@@ -1071,7 +1071,7 @@ function TerraformProject() {
             </div>
 
             <div className="terraform-plan-status">
-              <span className="terraform-status-dot"></span>
+              <span className="terraform-status-dot"></span>{" "}
               Completed
             </div>
           </div>

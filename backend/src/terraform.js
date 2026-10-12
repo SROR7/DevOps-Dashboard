@@ -123,7 +123,7 @@ function validateTerraformProject(projectName) {
 }
 
 function cleanTerraformOutput(output) {
-  const escapeChar = String.fromCharCode(27);
+  const escapeChar = String.fromCodePoint(27);
 
   const ansiRegex = new RegExp(
     `${escapeChar}(?:[@-Z\\\\-_]|\\[[0-?]*[ -/]*[@-~])`,
