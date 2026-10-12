@@ -3,6 +3,24 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const app = express();
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://k8s-dashboar-dashboar-d3ed1467af-640568485.us-east-1.elb.amazonaws.com",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.use(express.json());
+
 const githubApi = require("./github");
 
 const {
@@ -27,10 +45,7 @@ const {
   compareTerraformState,
 } = require("./terraform");
 
-const app = express();
-
-app.use(cors());
-app.use(express.json());
+// Health checks
 
 app.get("/", (req, res) => {
   res.json({
@@ -44,6 +59,8 @@ app.get("/api/health", (req, res) => {
     status: "ok",
   });
 });
+
+// GitHub API
 
 app.get("/api/github/repos", async (req, res) => {
   try {
@@ -66,8 +83,7 @@ app.get("/api/github/repos", async (req, res) => {
 
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch GitHub repositories",
-      message:
-        error.response?.data?.message || error.message,
+      message: error.response?.data?.message || error.message,
     });
   }
 });
@@ -94,14 +110,13 @@ app.get("/api/github/actions", async (req, res) => {
     res.json(response.data.workflow_runs);
   } catch (error) {
     console.error(
-      "GitHub API Error:",
+      "GitHub Actions API Error:",
       error.response?.data || error.message
     );
 
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch GitHub Actions",
-      message:
-        error.response?.data?.message || error.message,
+      message: error.response?.data?.message || error.message,
     });
   }
 });
@@ -137,8 +152,7 @@ app.get("/api/github/pulls", async (req, res) => {
 
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch GitHub Pull Requests",
-      message:
-        error.response?.data?.message || error.message,
+      message: error.response?.data?.message || error.message,
     });
   }
 });
@@ -178,22 +192,19 @@ app.get("/api/github/issues", async (req, res) => {
 
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch GitHub Issues",
-      message:
-        error.response?.data?.message || error.message,
+      message: error.response?.data?.message || error.message,
     });
   }
 });
 
+// AWS API
+
 app.get("/api/aws/overview", async (req, res) => {
   try {
     const data = await getAwsOverview();
-
     res.json(data);
   } catch (error) {
-    console.error(
-      "AWS API Error:",
-      error.message
-    );
+    console.error("AWS API Error:", error.message);
 
     res.status(500).json({
       error: "Failed to fetch AWS data",
@@ -205,13 +216,9 @@ app.get("/api/aws/overview", async (req, res) => {
 app.get("/api/aws/ec2", async (req, res) => {
   try {
     const instances = await getEc2Instances();
-
     res.json(instances);
   } catch (error) {
-    console.error(
-      "AWS EC2 API Error:",
-      error.message
-    );
+    console.error("AWS EC2 API Error:", error.message);
 
     res.status(500).json({
       error: "Failed to fetch EC2 instances",
@@ -223,13 +230,9 @@ app.get("/api/aws/ec2", async (req, res) => {
 app.get("/api/aws/s3", async (req, res) => {
   try {
     const buckets = await getS3Buckets();
-
     res.json(buckets);
   } catch (error) {
-    console.error(
-      "AWS S3 API Error:",
-      error.message
-    );
+    console.error("AWS S3 API Error:", error.message);
 
     res.status(500).json({
       error: "Failed to fetch S3 buckets",
@@ -241,13 +244,9 @@ app.get("/api/aws/s3", async (req, res) => {
 app.get("/api/aws/rds", async (req, res) => {
   try {
     const databases = await getRdsDatabases();
-
     res.json(databases);
   } catch (error) {
-    console.error(
-      "Failed to fetch RDS databases:",
-      error
-    );
+    console.error("AWS RDS API Error:", error.message);
 
     res.status(500).json({
       error: "Failed to fetch RDS databases",
@@ -259,13 +258,9 @@ app.get("/api/aws/rds", async (req, res) => {
 app.get("/api/aws/eks", async (req, res) => {
   try {
     const clusters = await getEksClusters();
-
     res.json(clusters);
   } catch (error) {
-    console.error(
-      "AWS EKS API Error:",
-      error.message
-    );
+    console.error("AWS EKS API Error:", error.message);
 
     res.status(500).json({
       error: "Failed to fetch EKS clusters",
@@ -274,16 +269,14 @@ app.get("/api/aws/eks", async (req, res) => {
   }
 });
 
+// Terraform API
+
 app.get("/api/terraform/status", async (req, res) => {
   try {
     const data = await getTerraformStatus();
-
     res.json(data);
   } catch (error) {
-    console.error(
-      "Terraform API Error:",
-      error.message
-    );
+    console.error("Terraform API Error:", error.message);
 
     res.status(500).json({
       installed: false,
@@ -296,13 +289,9 @@ app.get("/api/terraform/status", async (req, res) => {
 app.get("/api/terraform/projects", (req, res) => {
   try {
     const projects = getTerraformProjects();
-
     res.json(projects);
   } catch (error) {
-    console.error(
-      "Terraform Projects API Error:",
-      error.message
-    );
+    console.error("Terraform Projects API Error:", error.message);
 
     res.status(500).json({
       error: "Failed to fetch Terraform projects",
@@ -321,15 +310,10 @@ app.post("/api/terraform/plan", async (req, res) => {
       });
     }
 
-    const result =
-      await runTerraformPlan(project);
-
+    const result = await runTerraformPlan(project);
     res.json(result);
   } catch (error) {
-    console.error(
-      "Terraform Plan API Error:",
-      error.message
-    );
+    console.error("Terraform Plan API Error:", error.message);
 
     res.status(500).json({
       error: "Terraform plan failed",
@@ -338,86 +322,61 @@ app.post("/api/terraform/plan", async (req, res) => {
   }
 });
 
-app.post(
-  "/api/terraform/validate",
-  async (req, res) => {
-    try {
-      const { project } = req.body;
+app.post("/api/terraform/validate", async (req, res) => {
+  try {
+    const { project } = req.body;
 
-      if (!project) {
-        return res.status(400).json({
-          error: "Project name is required",
-        });
-      }
-
-      const result =
-        await validateTerraformProjectConfig(
-          project
-        );
-
-      res.json(result);
-    } catch (error) {
-      console.error(
-        "Terraform Validate API Error:",
-        error.message
-      );
-
-      res.status(500).json({
-        error: "Terraform validation failed",
-        message: error.message,
+    if (!project) {
+      return res.status(400).json({
+        error: "Project name is required",
       });
     }
+
+    const result = await validateTerraformProjectConfig(project);
+    res.json(result);
+  } catch (error) {
+    console.error("Terraform Validate API Error:", error.message);
+
+    res.status(500).json({
+      error: "Terraform validation failed",
+      message: error.message,
+    });
   }
-);
+});
 
-app.post(
-  "/api/terraform/init",
-  async (req, res) => {
-    try {
-      const { project } = req.body;
+app.post("/api/terraform/init", async (req, res) => {
+  try {
+    const { project } = req.body;
 
-      if (!project) {
-        return res.status(400).json({
-          error: "Project name is required",
-        });
-      }
-
-      const result =
-        await runTerraformInit(project);
-
-      res.json(result);
-    } catch (error) {
-      console.error(
-        "Terraform Init API Error:",
-        error.message
-      );
-
-      res.status(500).json({
-        error: "Terraform init failed",
-        message: error.message,
+    if (!project) {
+      return res.status(400).json({
+        error: "Project name is required",
       });
     }
+
+    const result = await runTerraformInit(project);
+    res.json(result);
+  } catch (error) {
+    console.error("Terraform Init API Error:", error.message);
+
+    res.status(500).json({
+      error: "Terraform init failed",
+      message: error.message,
+    });
   }
-);
+});
 
 app.get(
   "/api/terraform/projects/:project/resources",
   (req, res) => {
     try {
-      const resources = getTerraformResources(
-        req.params.project
-      );
-
+      const resources = getTerraformResources(req.params.project);
       res.json(resources);
     } catch (error) {
-      console.error(
-        "Terraform Resources API Error:",
-        error.message
-      );
+      console.error("Terraform Resources API Error:", error.message);
 
       res.status(500).json({
-        error:
-          "Failed to fetch Terraform resources",
+        error: "Failed to fetch Terraform resources",
         message: error.message,
       });
     }
@@ -428,10 +387,9 @@ app.get(
   "/api/terraform/projects/:project/compare",
   async (req, res) => {
     try {
-      const comparison =
-        await compareTerraformState(
-          req.params.project
-        );
+      const comparison = await compareTerraformState(
+        req.params.project
+      );
 
       res.json(comparison);
     } catch (error) {
@@ -441,19 +399,16 @@ app.get(
       );
 
       res.status(500).json({
-        error:
-          "Failed to compare Terraform state",
+        error: "Failed to compare Terraform state",
         message: error.message,
       });
     }
   }
 );
 
-/*
- * Terraform file
- * IMPORTANT:
- * This route must come BEFORE /:project
- */
+// Terraform file route
+// Keep this before the generic project route.
+
 app.get(
   "/api/terraform/projects/:project/files/:file",
   (req, res) => {
@@ -465,72 +420,56 @@ app.get(
 
       res.json(file);
     } catch (error) {
-      console.error(
-        "Terraform File API Error:",
-        error.message
-      );
+      console.error("Terraform File API Error:", error.message);
 
       res.status(500).json({
-        error:
-          "Failed to fetch Terraform file",
+        error: "Failed to fetch Terraform file",
         message: error.message,
       });
     }
   }
 );
 
-/*
- * Terraform state
- * This also must come BEFORE /:project
- */
+// Terraform state route
+// Keep this before the generic project route.
+
 app.get(
   "/api/terraform/projects/:project/state",
   async (req, res) => {
     try {
-      const state =
-        await getTerraformState(
-          req.params.project
-        );
+      const state = await getTerraformState(
+        req.params.project
+      );
 
       res.json(state);
     } catch (error) {
-      console.error(
-        "Terraform State API Error:",
-        error.message
-      );
+      console.error("Terraform State API Error:", error.message);
 
       res.status(500).json({
-        error:
-          "Failed to fetch Terraform state",
+        error: "Failed to fetch Terraform state",
         message: error.message,
       });
     }
   }
 );
 
-/*
- * Generic project route
- * KEEP THIS LAST
- */
+// Generic project route
+// Keep this after the more specific project routes.
+
 app.get(
   "/api/terraform/projects/:project",
   (req, res) => {
     try {
-      const project =
-        getTerraformProject(
-          req.params.project
-        );
+      const project = getTerraformProject(
+        req.params.project
+      );
 
       res.json(project);
     } catch (error) {
-      console.error(
-        "Terraform Project API Error:",
-        error.message
-      );
+      console.error("Terraform Project API Error:", error.message);
 
       res.status(500).json({
-        error:
-          "Failed to fetch Terraform project",
+        error: "Failed to fetch Terraform project",
         message: error.message,
       });
     }
@@ -547,15 +486,10 @@ app.post("/api/terraform/apply", async (req, res) => {
       });
     }
 
-    const result =
-      await runTerraformApply(project);
-
+    const result = await runTerraformApply(project);
     res.json(result);
   } catch (error) {
-    console.error(
-      "Terraform Apply API Error:",
-      error.message
-    );
+    console.error("Terraform Apply API Error:", error.message);
 
     res.status(500).json({
       error: "Terraform apply failed",
@@ -564,12 +498,10 @@ app.post("/api/terraform/apply", async (req, res) => {
   }
 });
 
-
+// Start server
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(
-    `Backend running on port ${PORT}`
-  );
+  console.log(`Backend running on port ${PORT}`);
 });
