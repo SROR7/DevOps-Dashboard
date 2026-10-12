@@ -13,7 +13,7 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:alpine
 
-COPY --from=build --chown=nginx:nginx /app/dist/ /usr/share/nginx/html/
+COPY --from=build --chown=0:0 --chmod=u=rwX,go=rX /app/dist/ /usr/share/nginx/html/
 
 EXPOSE 8080
 

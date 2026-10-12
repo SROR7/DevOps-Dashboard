@@ -125,7 +125,7 @@ function validateTerraformProject(projectName) {
 function cleanTerraformOutput(output) {
   return output
     .replace(
-      /\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g,
+      /\u001B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g,
       ""
     )
     .trim();
