@@ -123,12 +123,14 @@ function validateTerraformProject(projectName) {
 }
 
 function cleanTerraformOutput(output) {
-  return output
-    .replace(
-      /\u001B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g,
-      ""
-    )
-    .trim();
+  const escapeChar = String.fromCharCode(27);
+
+  const ansiRegex = new RegExp(
+    `${escapeChar}(?:[@-Z\\\\-_]|\\[[0-?]*[ -/]*[@-~])`,
+    "g"
+  );
+
+  return output.replace(ansiRegex, "").trim();
 }
 
 function runTerraformCommand(

@@ -169,7 +169,6 @@ function Terraform() {
         type="file"
         multiple
         webkitdirectory=""
-        directory=""
         onChange={handleTerraformFolderSelect}
         style={{ display: "none" }}
       />
