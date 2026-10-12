@@ -4,9 +4,14 @@ WORKDIR /app
 
 COPY package*.json ./
 
+# Install production dependencies
 RUN npm ci --omit=dev
 
-COPY src/ ./src/
+# Copy application source code
+COPY --chown=node:node src/ ./src/
+
+# Run the application as a non-root user
+USER node
 
 EXPOSE 3000
 

@@ -5,6 +5,9 @@ const cors = require("cors");
 
 const app = express();
 
+// Security: prevent Express from disclosing its framework information.
+app.disable("x-powered-by");
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
