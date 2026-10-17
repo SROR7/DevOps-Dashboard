@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const { execFile } = require("child_process");
+const fs = require("node:fs");
+const path = require("node:path");
+const { execFile } = require("node:child_process");
 
 const terraform = require("@jahed/terraform");
 const { install } = require("@jahed/terraform/lib/install");
